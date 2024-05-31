@@ -1,4 +1,4 @@
-# ApplicationName: ShareMyTrip
+# ShareMyTrip
 
 #TeamName: Code Riders
 
