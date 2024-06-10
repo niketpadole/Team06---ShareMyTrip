@@ -13,6 +13,7 @@ import com.axis.team6.coderiders.sharemytrip.ridematchingservice.dto.CreatePubli
 import com.axis.team6.coderiders.sharemytrip.ridematchingservice.dto.PublisherRideDTO;
 import com.axis.team6.coderiders.sharemytrip.ridematchingservice.entity.PassengerRide;
 import com.axis.team6.coderiders.sharemytrip.ridematchingservice.entity.PublisherRide;
+import com.axis.team6.coderiders.sharemytrip.ridematchingservice.exception.RideNotFoundException;
 import com.axis.team6.coderiders.sharemytrip.ridematchingservice.repository.PassengerRideRepository;
 import com.axis.team6.coderiders.sharemytrip.ridematchingservice.repository.PublisherRideRepository;
 
@@ -85,6 +86,13 @@ public class RideServiceImpl implements RideService
         return publisherRides.stream()
                 .map(ride -> modelMapper.map(ride, PublisherRideDTO.class))
                 .collect(Collectors.toList());
+    }
+    
+    //cancel ride by passenger
+    public void cancelRide(int passengerRideId) {
+        PassengerRide passengerRide = passengerRideRepository.findById(passengerRideId)
+                .orElseThrow(() -> new RideNotFoundException("Passenger ride not found with id: " + passengerRideId));
+        passengerRideRepository.delete(passengerRide);
     }
 }
 
