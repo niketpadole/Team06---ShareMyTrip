@@ -25,4 +25,6 @@ public interface RideService {
 	List<PublisherRideDTO> getPassengerRides(int passengerId);
 
 	List<PublisherRideDTO> getFilteredRides(String fromLocation, String toLocation);
+	
+	void cancelRide(int passengerRideId);
 }

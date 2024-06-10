@@ -89,4 +89,11 @@ public class PassengerController {
         List<PublisherRideDTO> rides = passengerService.getFilteredRides(fromLocation, toLocation);
         return ResponseEntity.ok(rides);
     }
+    
+    //cancel ride
+    @DeleteMapping("/cancel/{passengerRideId}")
+    public ResponseEntity<Void> cancelBooking(@PathVariable int passengerRideId) {
+        passengerService.cancelBooking(passengerRideId);
+        return ResponseEntity.noContent().build();
+    }
 }

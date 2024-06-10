@@ -96,5 +96,12 @@ public class PassengerServiceImpl implements PassengerService {
         PublisherRideDTO[] rides = restTemplate.getForObject(url, PublisherRideDTO[].class);
         return Arrays.asList(rides);
     }
+    
+    //cancel booking
+    @Override
+    public void cancelBooking(int passengerRideId) {
+        String url = RIDE_MATCHING_SERVICE_URL + "/cancel/" + passengerRideId;
+        restTemplate.delete(url);
+    }
 
 }

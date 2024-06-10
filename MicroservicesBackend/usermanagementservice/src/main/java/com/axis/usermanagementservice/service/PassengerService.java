@@ -28,4 +28,6 @@ public interface PassengerService {
     List<PublisherRideDTO> getPassengerRides(int passengerId);
     
     List<PublisherRideDTO> getFilteredRides(String fromLocation, String toLocation);
+    
+    void cancelBooking(int passengerRideId);
 }
