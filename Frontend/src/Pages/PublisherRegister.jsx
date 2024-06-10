@@ -1,88 +1,133 @@
 import React, { useState } from "react";
 import Layout from "../Components/Layouts/Layout";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const PublisherRegister = () => {
+  const navigate = useNavigate();
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [mobile, setMobile] = useState();
+  const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [drivingLicence, setDrivingLicence] = useState(null);
   const [addhar, setAddhar] = useState(null);
   const [miniBio, setMiniBio] = useState("");
-  const [modelName, setModelName] = useState("");
-  const [veichleNumber, setVeichleNumber] = useState();
+  const [vehicleModelName, setModelName] = useState("");
+  const [vehicleNo, setVeichleNumber] = useState("");
   const [errorMessageFirstName, setErrorMessageFirstName] = useState("");
   const [errorMessageLastName, setErrorMessageLastName] = useState("");
   const [errorMessageMobile, setErrorMessageMobile] = useState("");
   const [errorMessageEmail, setErrorMessageEmail] = useState("");
   const [errorMessagePassword, setErrorMessagePassword] = useState("");
   const [errorMessageDOB, setErrorMessageDOB] = useState("");
-  const [errorMessageDrivingLicence, setErrorMessageDrivingLicence] = useState("");
+  const [errorMessageDrivingLicence, setErrorMessageDrivingLicence] =
+    useState("");
   const [errorMessageAddhar, setErrorMessageAddhar] = useState("");
-  const [errorMessageModelName, setErrorMessageModeName] = useState("");
+  const [errorMessageModelName, setErrorMessageModelName] = useState("");
   const [errorMessageVeichleNumber, setErrorMessageVeichleNumber] =
     useState("");
 
-  const register = (e) => {
-    e.preventDefault();
+  const validate = () => {
+    let isValid = true;
+
     if (!firstName) {
       setErrorMessageFirstName("First Name Is Required");
+      isValid = false;
     }
     if (!lastName) {
       setErrorMessageLastName("Last Name Is Required");
+      isValid = false;
     }
     if (!mobile) {
       setErrorMessageMobile("Mobile Number is Required");
+      isValid = false;
     }
     if (!email) {
       setErrorMessageEmail("Email is Mandatory");
-      return;
+      isValid = false;
     }
     if (!password) {
       setErrorMessagePassword("Password Fields Is Mandatory");
-      return;
+      isValid = false;
     }
     if (!dateOfBirth) {
       setErrorMessageDOB("DOB is Required");
+      isValid = false;
+    } else {
       const dob = new Date(dateOfBirth);
       const today = new Date();
-      let age = today.getFullYear() - dob.getFullYear();
-      let monthDiff = today.getMonth() - dob.getMonth();
-      if (
-        monthDiff < 0 ||
-        (monthDiff === 0 && today.getDate() < dob.getDate())
-      ) {
-        age--;
-      }
+      const minDOB = new Date("1947-01-01");
 
-      if (age < 18) {
-        setErrorMessageDOB("You must be at least 18 years old to register.");
+      if (dob > today) {
+        setErrorMessageDOB("Date of Birth cannot be a future date.");
+        isValid = false;
+      } else if (dob < minDOB) {
+        setErrorMessageDOB("Date of Birth cannot be before 1947.");
+        isValid = false;
+      } else {
+        setErrorMessageDOB("");
       }
     }
-    if(!drivingLicence)
-      {
-        setErrorMessageDrivingLicence("Document is Required");
-      }
-      if(!addhar)
-        {
-          setErrorMessageAddhar("Document is Required");
-        }
+    if (!drivingLicence) {
+      setErrorMessageDrivingLicence("Document is Required");
+      isValid = false;
+    }
+    if (!addhar) {
+      setErrorMessageAddhar("Document is Required");
+      isValid = false;
+    }
 
-    const registerUser = {
-      firstName: firstName,
-      lastName: lastName,
-      mobile: mobile,
-      email: email,
-      password: password,
-      dateOfBirth: dateOfBirth,
-      drivingLicence: drivingLicence,
-      addhar: addhar,
-      miniBio: miniBio,
-    };
-    console.log(registerUser);
+    return isValid;
   };
+
+  const register = async (e) => {
+    try {
+      e.preventDefault();
+      const validation = validate();
+      if (validation) {
+        const response = await axios.post("http://localhost:8089/publishers/register", {
+          firstName,
+          lastName,
+          mobile,
+          email,
+          password,
+          dateOfBirth,
+          drivingLicence,
+          addhar,
+          miniBio,
+          vehicleModelName,
+          vehicleNo
+        });
+        if(response.status == 200)
+          {
+            toast.success("Publisher Registration SucessFull",{
+              duration:5000
+            });
+            navigate("/log-in/publisher")
+          }
+          else{
+            toast.error("Registration Failed",{
+              duration:3000
+            })
+          }
+      }
+      else{
+        toast.error("Validation Failed");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Internal Error",{
+        duration:3000
+      })
+    }
+  };
+
+  const maxDate = new Date().toISOString().split("T")[0];
+
   return (
     <Layout>
       <div className="flex justify-center items-center min-h-screen bg-[#fff4f1] px-4">
@@ -113,6 +158,11 @@ const PublisherRegister = () => {
                   required
                   className="w-full p-2 border border-[#ddd] rounded-md"
                 />
+                {errorMessageFirstName && (
+                  <p className="text-red-500 text-sm">
+                    {errorMessageFirstName}
+                  </p>
+                )}
               </div>
               <div className="mb-5">
                 <label htmlFor="lastName" className="block mb-2 text-[#333]">
@@ -128,6 +178,9 @@ const PublisherRegister = () => {
                   required
                   className="w-full p-2 border border-[#ddd] rounded-md"
                 />
+                {errorMessageLastName && (
+                  <p className="text-red-500 text-sm">{errorMessageLastName}</p>
+                )}
               </div>
               <div className="mb-5">
                 <label htmlFor="mobile" className="block mb-2 text-[#333]">
@@ -143,6 +196,9 @@ const PublisherRegister = () => {
                   required
                   className="w-full p-2 border border-[#ddd] rounded-md"
                 />
+                {errorMessageMobile && (
+                  <p className="text-red-500 text-sm">{errorMessageMobile}</p>
+                )}
               </div>
               <div className="mb-5">
                 <label htmlFor="email" className="block mb-2 text-[#333]">
@@ -158,6 +214,9 @@ const PublisherRegister = () => {
                   required
                   className="w-full p-2 border border-[#ddd] rounded-md"
                 />
+                {errorMessageEmail && (
+                  <p className="text-red-500 text-sm">{errorMessageEmail}</p>
+                )}
               </div>
               <div className="mb-5">
                 <label htmlFor="password" className="block mb-2 text-[#333]">
@@ -173,6 +232,9 @@ const PublisherRegister = () => {
                   required
                   className="w-full p-2 border border-[#ddd] rounded-md"
                 />
+                {errorMessagePassword && (
+                  <p className="text-red-500 text-sm">{errorMessagePassword}</p>
+                )}
               </div>
               <div className="mb-5">
                 <label htmlFor="dob" className="block mb-2 text-[#333]">
@@ -184,9 +246,14 @@ const PublisherRegister = () => {
                   name="dob"
                   value={dateOfBirth}
                   onChange={(e) => setDateOfBirth(e.target.value)}
+                  max={maxDate}
+                  min="1947-01-01"
                   required
                   className="w-full p-2 border border-[#ddd] rounded-md"
                 />
+                {errorMessageDOB && (
+                  <p className="text-red-500 text-sm">{errorMessageDOB}</p>
+                )}
               </div>
               <div className="mb-5">
                 <label
@@ -204,20 +271,28 @@ const PublisherRegister = () => {
                   className="w-full p-2 border border-[#ddd] rounded-md"
                   onChange={(e) => setDrivingLicence(e.target.files[0])}
                 />
+                {errorMessageDrivingLicence && (
+                  <p className="text-red-500 text-sm">
+                    {errorMessageDrivingLicence}
+                  </p>
+                )}
               </div>
               <div className="mb-5">
-                <label htmlFor="adhar" className="block mb-2 text-[#333]">
-                  Aadhaar Card
+                <label htmlFor="addhar" className="block mb-2 text-[#333]">
+                  Aadhar
                 </label>
                 <input
                   type="file"
-                  id="aadhaar"
-                  name="aadhaar"
+                  id="addhar"
+                  name="addhar"
                   accept="image/*"
                   required
                   className="w-full p-2 border border-[#ddd] rounded-md"
                   onChange={(e) => setAddhar(e.target.files[0])}
                 />
+                {errorMessageAddhar && (
+                  <p className="text-red-500 text-sm">{errorMessageAddhar}</p>
+                )}
               </div>
               <div className="mb-5">
                 <label htmlFor="miniBio" className="block mb-2 text-[#333]">
@@ -226,59 +301,62 @@ const PublisherRegister = () => {
                 <textarea
                   id="miniBio"
                   name="miniBio"
-                  placeholder="I don't like smoking"
+                  placeholder="Write a short bio"
                   value={miniBio}
                   onChange={(e) => setMiniBio(e.target.value)}
-                  className="w-full h-20 p-2 border border-[#ddd] rounded-md resize-none"
-                />
+                  className="w-full p-2 border border-[#ddd] rounded-md"
+                ></textarea>
               </div>
               <div className="mb-5">
                 <label htmlFor="modelName" className="block mb-2 text-[#333]">
-                  Veichle Model Name
+                  Model Name
                 </label>
                 <input
                   type="text"
-                  id="modelname"
-                  name="modelname"
-                  placeholder="Hundai Creta"
-                  value={modelName}
-                  onChange={(e) => setModelName(e.target.value)}
+                  id="modelName"
+                  name="modelName"
+                  placeholder="Enter your vehicle model name"
+                  value={vehicleModelName}
                   required
+                  onChange={(e) => setModelName(e.target.value)}
                   className="w-full p-2 border border-[#ddd] rounded-md"
                 />
+                {errorMessageModelName && (
+                  <p className="text-red-500 text-sm">
+                    {errorMessageModelName}
+                  </p>
+                )}
               </div>
               <div className="mb-5">
                 <label
                   htmlFor="veichleNumber"
                   className="block mb-2 text-[#333]"
                 >
-                  Veichle Number
+                  Vehicle Number
                 </label>
                 <input
                   type="text"
                   id="veichleNumber"
                   name="veichleNumber"
-                  placeholder="AP04A"
-                  value={veichleNumber}
-                  onChange={(e) => setVeichleNumber(e.target.value)}
+                  placeholder="Enter your vehicle number"
+                  value={vehicleNo}
                   required
+                  onChange={(e) => setVeichleNumber(e.target.value)}
                   className="w-full p-2 border border-[#ddd] rounded-md"
                 />
+                {errorMessageVeichleNumber && (
+                  <p className="text-red-500 text-sm">
+                    {errorMessageVeichleNumber}
+                  </p>
+                )}
               </div>
               <button
-                type="submit"
-                className="bg-[#ff6f61] text-white p-2.5 rounded-md w-full text-lg hover:bg-[#e65a50]"
                 onClick={register}
+                className="bg-[#ff6f61] text-white py-2 px-4 rounded-md hover:bg-[#ff3b2e]"
               >
                 Register
               </button>
             </form>
-            <p className="mt-5">
-              Already Registered?{" "}
-              <a href="login.html" className="text-[#ff6f61]">
-                Log In here
-              </a>
-            </p>
           </div>
         </div>
       </div>

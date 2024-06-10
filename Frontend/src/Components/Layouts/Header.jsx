@@ -5,9 +5,14 @@ import { HashLink } from "react-router-hash-link";
 const Header = () => {
   const [dropDown, setDropDown] = useState(false);
   const [registerDropDown, setRegisterDropDown] = useState(false);
+  const [loginDropDown, setLoginDropDown] = useState(false);
 
   const toggleRegisterDropDown = () => {
     setRegisterDropDown(!registerDropDown);
+  };
+
+  const toggleLoginDropDown = () => {
+    setLoginDropDown(!loginDropDown);
   };
 
   const toggleDropDown = () => {
@@ -44,13 +49,29 @@ const Header = () => {
                     Testimonials
                   </HashLink>
                 </li>
-                <li>
-                  <NavLink
-                    to="/log-in"
+                <li className="relative">
+                  <button
+                    onClick={toggleLoginDropDown}
                     className="block px-4 py-2 text-white text-lg hover:text-[#6f61ff] active:text-[#6f61ff]"
                   >
                     Log-In
-                  </NavLink>
+                  </button>
+                  <div
+                    className={`absolute top-full left-0 bg-white rounded-lg shadow-md mt-2 w-48 ${loginDropDown ? "block" : "hidden"}`}
+                  >
+                    <NavLink
+                      to="/log-in/passanger"
+                      className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                    >
+                      Passanger
+                    </NavLink>
+                    <NavLink
+                      to="/log-in/publisher"
+                      className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                    >
+                      Publisher
+                    </NavLink>
+                  </div>
                 </li>
                 <li className="relative">
                   <button
