@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.axis.team6.coderiders.sharemytrip.ridematchingservice.entity.PassengerRideTest
--------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in com.axis.team6.coderiders.sharemytrip.ridematchingservice.entity.PassengerRideTest
