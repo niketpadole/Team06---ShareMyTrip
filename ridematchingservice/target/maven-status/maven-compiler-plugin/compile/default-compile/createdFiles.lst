@@ -1,0 +1,12 @@
+com\axis\team6\coderiders\sharemytrip\ridematchingservice\controller\RideController.class
+com\axis\team6\coderiders\sharemytrip\ridematchingservice\repository\PublisherRideRepository.class
+com\axis\team6\coderiders\sharemytrip\ridematchingservice\dto\CreatePublisherRideDTO.class
+com\axis\team6\coderiders\sharemytrip\ridematchingservice\entity\PublisherRide.class
+com\axis\team6\coderiders\sharemytrip\ridematchingservice\exception\RideNotFoundException.class
+com\axis\team6\coderiders\sharemytrip\ridematchingservice\dto\BookRideDTO.class
+com\axis\team6\coderiders\sharemytrip\ridematchingservice\service\RideService.class
+com\axis\team6\coderiders\sharemytrip\ridematchingservice\repository\PassengerRideRepository.class
+com\axis\team6\coderiders\sharemytrip\ridematchingservice\service\RideServiceImpl.class
+com\axis\team6\coderiders\sharemytrip\ridematchingservice\dto\PublisherRideDTO.class
+com\axis\team6\coderiders\sharemytrip\ridematchingservice\entity\PassengerRide.class
+com\axis\team6\coderiders\sharemytrip\ridematchingservice\RidematchingserviceApplication.class
