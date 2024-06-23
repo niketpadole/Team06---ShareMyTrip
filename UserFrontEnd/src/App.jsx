@@ -23,6 +23,10 @@ import PassangerTransaction from "./Pages/Passanger/ViewAllTransaction";
 import PublisherTransaction from "./Pages/Publisher/ViewAllTrasaction";
 import PublisherRoute from "./Routes/PublisherRoute"
 import PassangerRoute from "./Routes/PassangerRoute"
+import PrivacyPolicy from "./Pages/PrivacyPolicy"
+import TermsOfUse from "./Pages/TermsOfUse"
+import ContactUs from "./Pages/ContactUs"
+import PaymentSucess from "./Pages/PaymentSucess"
 
 
 function App() {
@@ -39,6 +43,10 @@ function App() {
         <Route path="/register/publisher" element={<PublisherRegister/>}/>
         <Route path="/reset-password/passanger" element={<ForgotPassword/>}/>
         <Route path="/reset-password/publisher" element={<ForgotPasswordPublisher/>}/>
+        <Route path="/PrivacyPolicy" element={<PrivacyPolicy/>}/>
+        <Route path="/TermsOfUse" element={<TermsOfUse/>}/>
+        <Route path="/contactUs" element={<ContactUs/>}/>
+        <Route path="/paymentSucess" element={<PaymentSucess/>}/>
         {/* Passanger Private Route */}
         <Route path="/passanger" element={<PassangerRoute/>}>
         <Route path="dashboard" element={<PassangerDashboard/>}/>

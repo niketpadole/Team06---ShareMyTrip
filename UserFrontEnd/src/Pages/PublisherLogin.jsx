@@ -37,7 +37,7 @@ const PublisherLogin = () => {
           duration: 6000,
         });
         console.log(response.data);
-        const { publisherId, firstName,lastName, email, mobile, dateOfBirth, userType, token } = response.data; //adding token later
+        const { publisherId, firstName,lastName, email, mobile, dateOfBirth, userType, token } = response.data;
         setAuth({
           id: publisherId,
           firstName,
@@ -50,7 +50,7 @@ const PublisherLogin = () => {
         });
         localStorage.setItem(
           "auth",
-          JSON.stringify({ id: publisherId,firstName,lastName,email, mobile, dateOfBirth, userType })
+          JSON.stringify({ id: publisherId,firstName,lastName,email, mobile, dateOfBirth, userType, token})
         );
         console.log(response.data);
         navigate("/");

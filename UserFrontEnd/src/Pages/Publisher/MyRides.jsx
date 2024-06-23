@@ -1,16 +1,82 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import Layout from "../../Components/Layouts/Layout";
+import { useAuth } from "../../context/auth";
 
 const MyRides = () => {
+  const [auth, setAuth] = useAuth();
   const [showPassengers, setShowPassengers] = useState(false);
-  const [rideStatus, setRideStatus] = useState("Not Started");
+  const [rides, setRides] = useState([]);
+  const [filteredRides, setFilteredRides] = useState([]);
+  const [passengers, setPassengers] = useState([]);
+  const [selectedRide, setSelectedRide] = useState(null);
+  const [filterStatus, setFilterStatus] = useState("ALL");
 
-  const handleViewPassengers = () => {
+  useEffect(() => {
+    // Fetch ride details from the API
+    axios
+      .get(`http://localhost:8089/user/publishers/${auth.id}/rides`)
+      .then((response) => {
+        setRides(response.data);
+        setFilteredRides(response.data);
+      })
+      .catch((error) => console.error("Error fetching rides:", error));
+  }, [auth.id]);
+
+  const handleViewPassengers = (rideId) => {
     setShowPassengers(!showPassengers);
+    setSelectedRide(rideId);
+    if (!showPassengers) {
+      axios
+        .get(`http://localhost:8089/user/publishers/${rideId}/passengers`)
+        .then((response) => setPassengers(response.data))
+        .catch((error) => console.error("Error fetching passengers:", error));
+    }
   };
 
-  const handleStartRide = () => {
-    setRideStatus("Started");
+  const handleStartRide = (rideId) => {
+    axios
+      .put(`http://localhost:8089/user/publishers/${rideId}/start`)
+      .then(() => {
+        setRides((prevRides) =>
+          prevRides.map((ride) =>
+            ride.publisherRideId === rideId ? { ...ride, status: "ONGOING" } : ride
+          )
+        );
+        setFilteredRides((prevRides) =>
+          prevRides.map((ride) =>
+            ride.publisherRideId === rideId ? { ...ride, status: "ONGOING" } : ride
+          )
+        );
+      })
+      .catch((error) => console.error("Error starting ride:", error));
+  };
+
+  const handleEndRide = (rideId) => {
+    axios
+      .put(`http://localhost:8089/user/publishers/${rideId}/end`)
+      .then(() => {
+        setRides((prevRides) =>
+          prevRides.map((ride) =>
+            ride.publisherRideId === rideId ? { ...ride, status: "COMPLETED" } : ride
+          )
+        );
+        setFilteredRides((prevRides) =>
+          prevRides.map((ride) =>
+            ride.publisherRideId === rideId ? { ...ride, status: "COMPLETED" } : ride
+          )
+        );
+      })
+      .catch((error) => console.error("Error ending ride:", error));
+  };
+
+  const handleFilterChange = (status) => {
+    setFilterStatus(status);
+    if (status === "ALL") {
+      setFilteredRides(rides);
+    } else {
+      setFilteredRides(rides.filter((ride) => ride.status === status));
+    }
   };
 
   return (
@@ -19,6 +85,19 @@ const MyRides = () => {
         <h1 className="text-4xl text-center text-red-600 mb-10">My Rides</h1>
         <section className="bg-white p-8 rounded-lg shadow-md max-w-4xl mx-auto">
           <h2 className="text-2xl text-red-600 mb-6">Published Rides</h2>
+          <div className="mb-4">
+            <label className="mr-4">Filter by status:</label>
+            <select
+              value={filterStatus}
+              onChange={(e) => handleFilterChange(e.target.value)}
+              className="text-gray-700 bg-white border border-gray-300 rounded-md"
+            >
+              <option value="ALL">All</option>
+              <option value="NOT_COMPLETED">Not Completed</option>
+              <option value="ONGOING">Ongoing</option>
+              <option value="COMPLETED">Completed</option>
+            </select>
+          </div>
           <div className="overflow-x-auto">
             <table className="min-w-full bg-white">
               <thead>
@@ -34,74 +113,72 @@ const MyRides = () => {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td className="border px-4 py-2">New York</td>
-                  <td className="border px-4 py-2">Boston</td>
-                  <td className="border px-4 py-2">2024-06-10</td>
-                  <td className="border px-4 py-2">10:00 AM</td>
-                  <td className="border px-4 py-2">3</td>
-                  <td className="border px-4 py-2">$50</td>
-                  <td className="border px-4 py-2">{rideStatus}</td>
-                  <td className="border px-4 py-2 flex space-x-2">
-                    <button
-                      onClick={handleViewPassengers}
-                      className="text-blue-500 hover:text-blue-700"
-                    >
-                      View
-                    </button>
-                  </td>
-                  <td className="border px-4 py-2 flex space-x-2">
-                    <button
-                      onClick={handleStartRide}
-                      className="text-green-500 hover:text-green-700"
-                    >
-                      Start
-                    </button>
-                  </td>
-                  <td className="border px-4 py-2 flex space-x-2">
-                    <button className="text-red-500 hover:text-red-700">
-                      Delete
-                    </button>
-                  </td>
-                </tr>
+                {filteredRides.map((ride) => (
+                  <tr key={ride.publisherRideId}>
+                    <td className="border px-4 py-2">{ride.fromLocation}</td>
+                    <td className="border px-4 py-2">{ride.toLocation}</td>
+                    <td className="border px-4 py-2">{ride.dateOfJourney}</td>
+                    <td className="border px-4 py-2">{ride.timeOfJourney}</td>
+                    <td className="border px-4 py-2">{ride.availableSeats}</td>
+                    <td className="border px-4 py-2">${ride.farePerSeat}</td>
+                    <td className="border px-4 py-2">{ride.status}</td>
+                    <td className="border px-4 py-2 flex space-x-2">
+                      <button
+                        onClick={() => handleViewPassengers(ride.publisherRideId)}
+                        className="text-blue-500 hover:text-blue-700"
+                      >
+                        View
+                      </button>
+                      {ride.status !== "COMPLETED" && (
+                        <>
+                          <button
+                            onClick={() => handleStartRide(ride.publisherRideId)}
+                            className="text-green-500 hover:text-green-700"
+                          >
+                            Start
+                          </button>
+                          {ride.status === "ONGOING" && (
+                            <button
+                              onClick={() => handleEndRide(ride.publisherRideId)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              End
+                            </button>
+                          )}
+                          {/* <button className="text-red-500 hover:text-red-700">
+                            Delete
+                          </button> */}
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
 
-          {showPassengers && (
+          {showPassengers && selectedRide && (
             <section className="bg-white p-8 mt-10 rounded-lg shadow-md">
               <h2 className="text-2xl text-red-600 mb-6">Passengers</h2>
               <div className="overflow-x-auto">
                 <table className="min-w-full bg-white">
                   <thead>
                     <tr>
-                      <th className="py-2 px-4 bg-gray-200 text-left">
-                        Passenger Name
-                      </th>
-                      <th className="py-2 px-4 bg-gray-200 text-left">
-                        Mobile Number
-                      </th>
-                      <th className="py-2 px-4 bg-gray-200 text-left">
-                        No. of Seats Booked
-                      </th>
-                      <th className="py-2 px-4 bg-gray-200 text-left">
-                        Payment Status
-                      </th>
+                      <th className="py-2 px-4 bg-gray-200 text-left">Passenger Name</th>
+                      <th className="py-2 px-4 bg-gray-200 text-left">Mobile Number</th>
+                      <th className="py-2 px-4 bg-gray-200 text-left">No. of Seats Booked</th>
+                      <th className="py-2 px-4 bg-gray-200 text-left">Payment Status</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td className="border px-4 py-2">John Doe</td>
-                      <td className="border px-4 py-2">123-456-7890</td>
-                      <td className="border px-4 py-2">2</td>
-                      <td className="border px-4 py-2">Paid</td>
-                    </tr>
-                    <tr>
-                      <td className="border px-4 py-2">Jane Smith</td>
-                      <td className="border px-4 py-2">987-654-3210</td>
-                      <td className="border px-4 py-2">1</td>
-                      <td className="border px-4 py-2">Pending</td>
-                    </tr>
+                    {passengers.map((passenger, index) => (
+                      <tr key={index}>
+                        <td className="border px-4 py-2">{passenger.passengerName}</td>
+                        <td className="border px-4 py-2">{passenger.passengerMobile}</td>
+                        <td className="border px-4 py-2">{passenger.passengerCount}</td>
+                        <td className="border px-4 py-2">{passenger.passengerPaymentStatus}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>

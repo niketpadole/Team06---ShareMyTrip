@@ -7,7 +7,7 @@ const Home = () => {
   const [auth,setAuth] = useAuth();
   return (
     <Layout>
-      {/* <p>{JSON.stringify(auth)}</p> */}
+      <p>{JSON.stringify(auth)}</p>
       <MainContent/>
     </Layout>
   );

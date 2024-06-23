@@ -1,4 +1,5 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
 
 const Content = () => {
   return (
@@ -16,12 +17,12 @@ const Content = () => {
             Sit back, relax, and enjoy your journey with ShareMyTrip. Your
             comfort is our priority.
           </p>
-          <a
-            href="#"
+          <NavLink
+            to="/log-in/publisher"
             className="inline-block px-6 py-3 bg-[#ff6f61] text-white text-lg font-bold rounded-md hover:bg-[#e65a50]"
           >
             Join Now
-          </a>
+          </NavLink>
         </div>
         <div className="mt-8 md:mt-0 md:ml-8">
           <img

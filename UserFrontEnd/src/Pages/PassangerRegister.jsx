@@ -125,7 +125,7 @@ const PassangerRegister = () => {
           </div>
           <div className="flex-1 p-6 md:p-10 text-center">
             <h1 className="mb-5 text-[#ff6f61] text-2xl md:text-3xl">
-              Register
+              Passenger Register
             </h1>
             <form action="/login" method="post" className="text-left">
               <div className="mb-5">

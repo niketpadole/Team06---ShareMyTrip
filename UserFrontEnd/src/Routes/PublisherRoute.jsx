@@ -3,7 +3,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/auth';
 import Spinner from '../Components/UI/Spinner';
 
-const PassangerRoute = () => {
+const PublisherRoute = () => {
   const [auth, setAuth] = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -30,4 +30,4 @@ const PassangerRoute = () => {
   return <Outlet />;
 };
 
-export default PassangerRoute;
+export default PublisherRoute;

@@ -28,7 +28,7 @@ const Login = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:8089/user/passengers/login", {
+      const response = await axios.post(`http://localhost:8089/user/passengers/login`, {
         email: userEmail,
         password
       });
@@ -121,7 +121,7 @@ const Login = () => {
               </button>
             </form>
             <p className="mt-5">
-              <NavLink to="/reset-password/passenger" className="text-[#ff6f61]">
+              <NavLink to="/reset-password/passanger" className="text-[#ff6f61]">
                 Forgot Password
               </NavLink>
             </p>

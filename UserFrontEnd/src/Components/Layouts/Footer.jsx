@@ -1,4 +1,6 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
+import { HashLink } from "react-router-hash-link";
 
 const Footer = () => {
   return (
@@ -7,60 +9,36 @@ const Footer = () => {
         <div className="max-w-6xl mx-auto px-5 flex flex-col items-center">
           <ul className="list-none p-0 flex flex-wrap justify-center mb-5">
             <li className="m-2.5">
-              <a
+              <HashLink
                 className="text-white no-underline font-bold transition-colors duration-300 hover:text-red-100"
-                href="#"
+                to="#about"
               >
                 About
-              </a>
+              </HashLink>
             </li>
             <li className="m-2.5">
-              <a
+              <NavLink
                 className="text-white no-underline font-bold transition-colors duration-300 hover:text-red-100"
-                href="#"
-              >
-                Pricing
-              </a>
-            </li>
-            <li className="m-2.5">
-              <a
-                className="text-white no-underline font-bold transition-colors duration-300 hover:text-red-100"
-                href="#"
+                to="/TermsOfUse"
               >
                 Terms of Use
-              </a>
+              </NavLink>
             </li>
             <li className="m-2.5">
-              <a
+              <NavLink
                 className="text-white no-underline font-bold transition-colors duration-300 hover:text-red-100"
-                href="#"
+                to="/PrivacyPolicy"
               >
                 Privacy Policy
-              </a>
+              </NavLink>
             </li>
             <li className="m-2.5">
-              <a
+              <NavLink
                 className="text-white no-underline font-bold transition-colors duration-300 hover:text-red-100"
-                href="#"
-              >
-                Careers
-              </a>
-            </li>
-            <li className="m-2.5">
-              <a
-                className="text-white no-underline font-bold transition-colors duration-300 hover:text-red-100"
-                href="#"
-              >
-                Blog
-              </a>
-            </li>
-            <li className="m-2.5">
-              <a
-                className="text-white no-underline font-bold transition-colors duration-300 hover:text-red-100"
-                href="#"
+                to="/contactUs"
               >
                 Contact Us
-              </a>
+              </NavLink>
             </li>
           </ul>
           <img
