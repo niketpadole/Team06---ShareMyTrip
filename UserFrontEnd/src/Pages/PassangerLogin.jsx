@@ -28,7 +28,7 @@ const Login = () => {
     }
 
     try {
-      const response = await axios.post(`http://localhost:8089/user/passengers/login`, {
+      const response = await axios.post(`http://api.sharemytrip.in.net:8089/user/passengers/login`, {
         email: userEmail,
         password
       });
