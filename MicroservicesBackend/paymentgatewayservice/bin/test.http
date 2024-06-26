@@ -1,0 +1,5 @@
+###
+POST localhost:8092/payment/createLink?orderId=12346899888888851
+
+###
+GET localhost:8092/payment/getPaymentStatus?paymentId=pay_OByMBsvTjZHDET&orderId=12346899888888851

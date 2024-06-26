@@ -2,19 +2,16 @@ package com.axis.team6.coderiders.sharemytrip.paymentgatewayservice.services;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
+import com.razorpay.*;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.axis.team6.coderiders.sharemytrip.paymentgatewayservice.dtos.PaymentLinkRequestDto;
+import com.axis.team6.coderiders.sharemytrip.paymentgatewayservice.dtos.TransactionLinkRequestDto;
 import com.axis.team6.coderiders.sharemytrip.paymentgatewayservice.models.PaymentStatus;
-import com.razorpay.Payment;
-import com.razorpay.PaymentLink;
-import com.razorpay.RazorpayClient;
-import com.razorpay.RazorpayException;
 
 @Service
-public class RazorPayGateway implements PaymentGateway{
+public class RazorPayGateway implements TransactionGateway{
 
 	@Autowired
     private final RazorpayClient razorpayClient;
@@ -24,7 +21,7 @@ public class RazorPayGateway implements PaymentGateway{
     }
 
     @Override
-    public String createPaymentLink(PaymentLinkRequestDto paymentLinkRequestDto) {
+    public String createPaymentLink(TransactionLinkRequestDto transactionLinkRequestDto) {
          /*
            There are generally two ways to integrate with a 3rd party
            1. Make an api call
@@ -32,30 +29,48 @@ public class RazorPayGateway implements PaymentGateway{
         */
 
         JSONObject paymentLinkRequest = new JSONObject();
-        paymentLinkRequest.put("amount",paymentLinkRequestDto.getAmount());
+
+        //*********change this***********
+        //FareCalculation
+        paymentLinkRequest.put("amount",transactionLinkRequestDto.getPassengerCount()*transactionLinkRequestDto.getFare()*100);
         paymentLinkRequest.put("currency","INR");
         paymentLinkRequest.put("expire_by", LocalDate.now().plusDays(7).atStartOfDay(ZoneId.systemDefault()).toEpochSecond());
-        paymentLinkRequest.put("reference_id",paymentLinkRequestDto.getOrderId());
-        paymentLinkRequest.put("description","Payment for order no " + paymentLinkRequestDto.getOrderId());
+        paymentLinkRequest.put("reference_id",transactionLinkRequestDto.getOrderId());
+        paymentLinkRequest.put("description","Payment for order no " + transactionLinkRequestDto.getOrderId());
 
         JSONObject customer = new JSONObject();
-        customer.put("name",paymentLinkRequestDto.getCustomerName());
-        customer.put("contact",paymentLinkRequestDto.getPhone());
-        customer.put("email","azinkya.ingle619@gmail.com");
+        customer.put("name",transactionLinkRequestDto.getPassengerName());
+        customer.put("contact",transactionLinkRequestDto.getPassengerMobile());
+        customer.put("email",transactionLinkRequestDto.getPassengerEmail());
         paymentLinkRequest.put("customer",customer);
 
         JSONObject notes = new JSONObject();
-        notes.put("policy_name","Jeevan Bima");
+        //notes.put("policy_name","Jeevan Bima");
+        notes.put("Passenger","paid for ride");
         paymentLinkRequest.put("notes",notes);
-        paymentLinkRequest.put("callback_url","https://www.google.com");
+        paymentLinkRequest.put("callback_url","http://localhost:5173/paymentSucess");
         paymentLinkRequest.put("callback_method","get");
-
+        PaymentLink payment=null;
         try {
-            PaymentLink  payment = razorpayClient.paymentLink.create(paymentLinkRequest);
-            return payment.get("short_url");
+            payment = razorpayClient.paymentLink.create(paymentLinkRequest);
+
         } catch (RazorpayException e) {
-            throw new RuntimeException("Failed to create payment link", e);
+            throw new RuntimeException(e);
         }
+        System.out.println("After link is created:"+payment.toString());
+        return payment.get("short_url");
+//        try {
+////            PaymentLink  payment = razorpayClient.paymentLink.create(paymentLinkRequest);
+//
+////            return payment.get("short_url");
+//                    Order order = razorpayClient.orders.create(paymentLinkRequest);
+//            System.out.println("After link is created:"+order.toString());
+//        return order.get("id");
+//
+//        } catch (RazorpayException e) {
+//            //throw new RuntimeException("Failed to create payment link", e);
+//        	return null;
+//        }
     }
 
     @Override

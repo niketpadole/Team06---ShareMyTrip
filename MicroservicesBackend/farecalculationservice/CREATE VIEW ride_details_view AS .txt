@@ -1,0 +1,40 @@
+CREATE VIEW ride_details_view AS 
+SELECT 
+    CONCAT(pt.passenger_id, '-', pr.publisher_ride_id) AS ride_details_key,
+    pt.passenger_id AS passenger_id,
+    pt.mobile as passenger_mobile,
+    pt.first_name as passenger_first_name,
+    pt.last_name as passenger_last_name,
+    pt.email as passenger_email,
+    p.publisher_id AS publisher_id,
+    p.first_name AS publisher_name,
+    p.total_earnings as total_earnings,
+    p.mobile AS publisher_mobile,
+    pr.from_location AS from_location,
+    pr.to_location AS to_location,
+    pr.available_seats AS no_of_seats,
+    pr.date_of_journey AS date,
+    pr.time_of_journey AS departure_time,
+    pr.fare_per_seat AS fare,
+    pr.distance AS distance,
+    pr.journey_hours AS journey_hours,
+    pr.status AS publisher_status,
+    pr.payment_status as publisher_payment_status,
+    pr.publisher_ride_id AS publisher_ride_id,
+    prt.passenger_ride_id as passenger_ride_id,
+    prt.payment_status as passenger_payment_status,
+    prt.no_of_passengers AS passenger_count 
+FROM 
+    passenger_ride_table prt
+JOIN 
+    publisher_ride_table pr ON prt.publisher_ride_id = pr.publisher_ride_id
+JOIN 
+    publisher_table p ON pr.publisher_id = p.publisher_id
+JOIN 
+    passenger_table pt ON prt.passenger_id = pt.passenger_id;
+
+
+docker login
+1)docker tag dockerize-usermanagementservice mccmto/smt_repo:usermanagementservice1
+
+2)docker push mccmto/smt_repo:usermanagementservice1
