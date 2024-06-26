@@ -28,31 +28,31 @@ jobs:
 
     - name: Build Email Service
       run: mvn clean package -DskipTests
-      working-directory: /emailservice/
+      working-directory: emailservice/
 
     - name: Build Auth Server
       run: mvn clean package -DskipTests
-      working-directory: /authserver/
+      working-directory: authserver/
 
     - name: Build Eureka Server
       run: mvn clean package -DskipTests
-      working-directory: /eurekaserver/
+      working-directory: eurekaserver/
 
     - name: Build Fare Calculation Service
       run: mvn clean package -DskipTests
-      working-directory: /farecalculationservice/
+      working-directory: farecalculationservice/
 
     - name: Build Payment Gateway Service
       run: mvn clean package -DskipTests
-      working-directory: /paymentgatewayservice/
+      working-directory: paymentgatewayservice/
 
     - name: Build Ride Matching Service
       run: mvn clean package -DskipTests
-      working-directory: /ridematchingservice/
+      working-directory: ridematchingservice/
 
     - name: Build User Management Service
       run: mvn clean package -DskipTests
-      working-directory: /usermanagementservice/
+      working-directory: usermanagementservice/
 
     - name: Build Docker images
       run: |
