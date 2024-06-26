@@ -6,8 +6,8 @@ on:
       - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  build-and-deploy:
+    runs-on: ubuntu-latest  # This runs on GitHub's Ubuntu runner
 
     services:
       docker:
@@ -50,6 +50,24 @@ jobs:
         docker push mccmto/smt_repo:emailservice
         docker push mccmto/smt_repo:farecalculationservice
 
-    - name: Deploy Services
+    - name: Deploy to EC2
+      env:
+        EC2_USER: ${{ secrets.EC2_USER }}
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+        EC2_KEY: ${{ secrets.EC2_KEY }}
       run: |
-        docker-compose -f docker-compose.yml up -d
+        echo "$EC2_KEY" > key.pem
+        chmod 600 key.pem
+
+        ssh -o StrictHostKeyChecking=no -i key.pem $EC2_USER@$EC2_HOST << 'EOF'
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          docker pull mccmto/smt_repo:eurekaserver1
+          docker pull mccmto/smt_repo:usermanagementservice1
+          docker pull mccmto/smt_repo:authserver1
+          docker pull mccmto/smt_repo:ridematchingservice1
+          docker pull mccmto/smt_repo:paymentgatewayservice
+          docker pull mccmto/smt_repo:emailservice
+          docker pull mccmto/smt_repo:farecalculationservice
+
+          docker-compose -f /home/ec2-user/docker-compose.yml up -d
+        EOF
