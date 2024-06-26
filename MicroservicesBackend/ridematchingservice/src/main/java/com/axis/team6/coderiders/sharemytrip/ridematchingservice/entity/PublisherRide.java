@@ -17,39 +17,50 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor	
 @Entity
-@Table(name="publisher_ride_table")
+@Table(name = "publisher_ride_table")
 public class PublisherRide {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "publisher_ride_id")
     private Integer publisherRideId;
-    
-    @Column(nullable = false)
+
+    @Column(name = "publisher_id", nullable = false)
     private Integer publisherId;
-    
-    @Column(nullable = false)
+
+    @Column(name = "from_location", nullable = false)
     private String fromLocation;
-    
-    @Column(nullable = false)
+
+    @Column(name = "to_location", nullable = false)
     private String toLocation;
-    
-    @Column(nullable = false)
+
+    @Column(name = "distance", nullable = false)
     private float distance;
-    
-    @Column(nullable = false)
+
+    @Column(name = "journey_hours", nullable = false)
     private float journeyHours;
-    
-    @Column(nullable = false)
+
+    @Column(name = "available_seats", nullable = false)
     private int availableSeats;
+
+    @Column(name="reserved_seats")
+    private int reservedSeats;
     
-    @Column(nullable = false)
+    @Column(name = "date_of_journey", nullable = false)
     private Date dateOfJourney;
-    
-    @Column(nullable = false)
+
+    @Column(name = "time_of_journey", nullable = false)
     private Time timeOfJourney;
-    
-    @Column(nullable = false)
+
+    @Column(name = "fare_per_seat", nullable = false)
     private float farePerSeat;
-    
+
+    @Column(name = "about_ride")
     private String aboutRide;
 
+    @Column(name = "status")
+    private String status;
+    
+    @Column(name = "payment_status")
+    private String paymentStatus = "PENDING";
 }

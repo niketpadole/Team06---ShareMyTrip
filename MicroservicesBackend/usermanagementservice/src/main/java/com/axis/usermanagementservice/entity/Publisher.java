@@ -24,7 +24,7 @@ public class Publisher {
     private String lastName;
 
     @Column(name = "mobile", nullable = false)
-    private long mobile;
+    private Long mobile;
 
     @Column(name = "date_of_birth", nullable = false)
     private java.sql.Date dateOfBirth;
@@ -32,10 +32,13 @@ public class Publisher {
     @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "driving_license", nullable = false)
+    @Column(name = "user_type")
+    private String userType = "PUBLISHER";
+
+    @Column(name = "driving_license")
     private String drivingLicense;
 
-    @Column(name = "aadhar_card", nullable = false)
+    @Column(name = "aadhar_card")
     private String aadharCard;
 
     @Column(name = "mini_bio")
@@ -52,6 +55,9 @@ public class Publisher {
 
     @Column(name = "timestamp", nullable = false)
     private java.sql.Timestamp timestamp;
+    
+    @Column(name="total_earnings")//,columnDefinition = "FLOAT DEFAULT 0"
+    private Float totalEarnings=0f;
 
 }
 

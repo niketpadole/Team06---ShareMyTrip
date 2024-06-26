@@ -26,7 +26,7 @@ public class Passenger {
     private String lastName;
 
     @Column(name = "mobile", nullable = false)
-    private long mobile;
+    private Long mobile;
 
     @Column(name = "date_of_birth", nullable = false)
     private java.sql.Date dateOfBirth;
@@ -34,7 +34,10 @@ public class Passenger {
     @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "aadhar_card", nullable = false)
+    @Column(name = "user_type")
+    private String userType = "PASSENGER";
+
+    @Column(name = "aadhar_card")
     private String aadharCard;
 
     @Column(name = "mini_bio")

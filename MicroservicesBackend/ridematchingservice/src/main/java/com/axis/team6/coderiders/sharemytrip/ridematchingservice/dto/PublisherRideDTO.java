@@ -4,6 +4,7 @@ package com.axis.team6.coderiders.sharemytrip.ridematchingservice.dto;
 import java.sql.Date;
 import java.sql.Time;
 
+import jakarta.persistence.Column;
 import lombok.Data;
 
 @Data
@@ -15,9 +16,12 @@ public class PublisherRideDTO {
     private float distance;
     private float journeyHours;
     private int availableSeats;
+    private int reservedSeats;
     private Date dateOfJourney;
     private Time timeOfJourney;
-    private float farePerSeats;
+    private float farePerSeat;
     private String aboutRide;
     private java.sql.Timestamp timestamp;
+    private String status="NOT_COMPLETED";
+    private String paymentStatus = "PENDING";
 }
