@@ -31,24 +31,24 @@ jobs:
 
     - name: Build Docker images
       run: |
-        docker build -t mccmto/smt_repo:eurekaserver1 ./eurekaserver
-        docker build -t mccmto/smt_repo:usermanagementservice1 ./usermanagementservice
-        docker build -t mccmto/smt_repo:authserver1 ./authserver
-        docker build -t mccmto/smt_repo:ridematchingservice1 ./ridematchingservice
-        docker build -t mccmto/smt_repo:paymentgatewayservice ./paymentgatewayservice
-        docker build -t mccmto/smt_repo:emailservice ./emailservice
-        docker build -t mccmto/smt_repo:farecalculationservice ./farecalculationservice
+        docker build -t niketpadole06@gmail.com/smt_repo:eurekaserver1 ./eurekaserver
+        docker build -t niketpadole06@gmail.com/smt_repo:usermanagementservice1 ./usermanagementservice
+        docker build -t niketpadole06@gmail.com/smt_repo:authserver1 ./authserver
+        docker build -t niketpadole06@gmail.com/smt_repo:ridematchingservice1 ./ridematchingservice
+        docker build -t niketpadole06@gmail.com/smt_repo:paymentgatewayservice ./paymentgatewayservice
+        docker build -t niketpadole06@gmail.com/smt_repo:emailservice ./emailservice
+        docker build -t niketpadole06@gmail.com/smt_repo:farecalculationservice ./farecalculationservice
 
     - name: Push Docker images
       run: |
         echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-        docker push mccmto/smt_repo:eurekaserver1
-        docker push mccmto/smt_repo:usermanagementservice1
-        docker push mccmto/smt_repo:authserver1
-        docker push mccmto/smt_repo:ridematchingservice1
-        docker push mccmto/smt_repo:paymentgatewayservice
-        docker push mccmto/smt_repo:emailservice
-        docker push mccmto/smt_repo:farecalculationservice
+        docker push niketpadole06@gmail.com/smt_repo:eurekaserver1
+        docker push niketpadole06@gmail.com/smt_repo:usermanagementservice1
+        docker push niketpadole06@gmail.com/smt_repo:authserver1
+        docker push niketpadole06@gmail.com/smt_repo:ridematchingservice1
+        docker push niketpadole06@gmail.com/smt_repo:paymentgatewayservice
+        docker push niketpadole06@gmail.com/smt_repo:emailservice
+        docker push niketpadole06@gmail.com/smt_repo:farecalculationservice
 
     - name: Deploy to EC2
       env:
@@ -61,13 +61,13 @@ jobs:
 
         ssh -o StrictHostKeyChecking=no -i key.pem $EC2_USER@$EC2_HOST << 'EOF'
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker pull mccmto/smt_repo:eurekaserver1
-          docker pull mccmto/smt_repo:usermanagementservice1
-          docker pull mccmto/smt_repo:authserver1
-          docker pull mccmto/smt_repo:ridematchingservice1
-          docker pull mccmto/smt_repo:paymentgatewayservice
-          docker pull mccmto/smt_repo:emailservice
-          docker pull mccmto/smt_repo:farecalculationservice
+          docker pull niketpadole06@gmail.com/smt_repo:eurekaserver1
+          docker pull niketpadole06@gmail.com/smt_repo:usermanagementservice1
+          docker pull niketpadole06@gmail.com/smt_repo:authserver1
+          docker pull niketpadole06@gmail.com/smt_repo:ridematchingservice1
+          docker pull niketpadole06@gmail.com/smt_repo:paymentgatewayservice
+          docker pull niketpadole06@gmail.com/smt_repo:emailservice
+          docker pull niketpadole06@gmail.com/smt_repo:farecalculationservice
 
           docker-compose -f /home/ec2-user/docker-compose.yml up -d
         EOF
