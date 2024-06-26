@@ -17,5 +17,6 @@ public class CreatePublisherRideDTO {
     private Time timeOfJourney;
     private float farePerSeat;
     private String aboutRide;
+    private String paymentStatus = "PENDING";
 
 }
