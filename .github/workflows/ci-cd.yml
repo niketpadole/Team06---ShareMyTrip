@@ -26,8 +26,33 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
 
-    - name: Build with Maven
+    - name: Build Email Service
       run: mvn clean package -DskipTests
+      working-directory: ./MicroservicesBackend/emailservice/
+
+    - name: Build Auth Server
+      run: mvn clean package -DskipTests
+      working-directory: ./MicroservicesBackend/authserver/
+
+    - name: Build Eureka Server
+      run: mvn clean package -DskipTests
+      working-directory: ./MicroservicesBackend/eurekaserver/
+
+    - name: Build Fare Calculation Service
+      run: mvn clean package -DskipTests
+      working-directory: ./MicroservicesBackend/farecalculationservice/
+
+    - name: Build Payment Gateway Service
+      run: mvn clean package -DskipTests
+      working-directory: ./MicroservicesBackend/paymentgatewayservice/
+
+    - name: Build Ride Matching Service
+      run: mvn clean package -DskipTests
+      working-directory: ./MicroservicesBackend/ridematchingservice/
+
+    - name: Build User Management Service
+      run: mvn clean package -DskipTests
+      working-directory: ./MicroservicesBackend/usermanagementservice/
 
     - name: Build Docker images
       run: |
