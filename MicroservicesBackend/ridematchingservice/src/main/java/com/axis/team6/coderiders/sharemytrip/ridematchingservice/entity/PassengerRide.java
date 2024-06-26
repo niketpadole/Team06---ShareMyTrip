@@ -14,19 +14,26 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="passenger_ride_table")
+@Table(name = "passenger_ride_table")
 public class PassengerRide {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "passenger_ride_id")
     private Integer passengerRideId;
-    
-    @Column(nullable = false)
+
+    @Column(name = "publisher_ride_id", nullable = false)
     private Integer publisherRideId;
-    
-    @Column(nullable = false)
+
+    @Column(name = "passenger_id", nullable = false)
     private Integer passengerId;
-    
-    @Column(nullable = false)
+
+    @Column(name = "no_of_passengers", nullable = false)
     private int noOfPassengers;
 
+    @Column(name = "status")
+    private String status = "NOT_COMPLETED";
+    
+    @Column(name = "payment_status")
+    private String paymentStatus = "PENDING";
 }
