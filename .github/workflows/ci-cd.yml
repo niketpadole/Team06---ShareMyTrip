@@ -1,0 +1,55 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      docker:
+        image: docker:19.03.12
+        options: --privileged
+        ports:
+          - 2375:2375
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'
+        distribution: 'adopt'
+
+    - name: Build with Maven
+      run: mvn clean package -DskipTests
+
+    - name: Build Docker images
+      run: |
+        docker build -t mccmto/smt_repo:eurekaserver1 ./eurekaserver
+        docker build -t mccmto/smt_repo:usermanagementservice1 ./usermanagementservice
+        docker build -t mccmto/smt_repo:authserver1 ./authserver
+        docker build -t mccmto/smt_repo:ridematchingservice1 ./ridematchingservice
+        docker build -t mccmto/smt_repo:paymentgatewayservice ./paymentgatewayservice
+        docker build -t mccmto/smt_repo:emailservice ./emailservice
+        docker build -t mccmto/smt_repo:farecalculationservice ./farecalculationservice
+
+    - name: Push Docker images
+      run: |
+        echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+        docker push mccmto/smt_repo:eurekaserver1
+        docker push mccmto/smt_repo:usermanagementservice1
+        docker push mccmto/smt_repo:authserver1
+        docker push mccmto/smt_repo:ridematchingservice1
+        docker push mccmto/smt_repo:paymentgatewayservice
+        docker push mccmto/smt_repo:emailservice
+        docker push mccmto/smt_repo:farecalculationservice
+
+    - name: Deploy Services
+      run: |
+        docker-compose -f docker-compose.yml up -d
