@@ -156,12 +156,11 @@ public class GoogleMapsService {
                 JSONObject durationObject = elements.getJSONObject(0).getJSONObject("duration");
                 double durationInSeconds = durationObject.getDouble("value");
 
-                long millis = (long) durationInSeconds * 1000;
-                long hours = millis / 3600000;
-                long minutes = (millis % 3600000) / 60000;
-                long seconds = (millis % 60000) / 1000;
+                long totalHours = (long)durationInSeconds / 3600;
+                long minutes = (long) ((durationInSeconds % 3600) / 60);
+                long seconds = (long) (durationInSeconds % 60);
 
-                return  String.format("%d:%02d:%02d", hours, minutes, seconds);
+                return String.format("%d:%02d:%02d", totalHours, minutes, seconds);
             } catch (org.json.JSONException e) {
                 throw new InvalidLocationException("Enter correct locations");
             }

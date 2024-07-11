@@ -15,7 +15,6 @@ import java.sql.Time;
 
 @RestController
 @RequestMapping("/fare")
-@CrossOrigin("*")
 public class FareCalculationController {
 
     @Autowired
@@ -33,9 +32,17 @@ public class FareCalculationController {
     }
 
     @PostMapping("/calculateJourneyTime")
-    public Time calculateJourneyTime(@RequestBody FareCalculationRequestDTO requestDTO) {
-        return Time.valueOf(fareCalculationService.calculateJourneyTime(requestDTO));
+    public ResponseEntity<String> calculateJourneyTime(@RequestBody FareCalculationRequestDTO requestDTO) {
+        try {
+            String journeyTime = fareCalculationService.calculateJourneyTime(requestDTO);
+            return ResponseEntity.ok(journeyTime);
+        } catch (InvalidLocationException ex) {
+            return handleInvalidLocationException(ex);
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while calculating journey time.");
+        }
     }
+
     @ExceptionHandler(InvalidLocationException.class)
     public ResponseEntity<String> handleInvalidLocationException(InvalidLocationException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());

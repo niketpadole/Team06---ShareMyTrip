@@ -50,20 +50,20 @@ public class FareCalculationServiceImpl implements FareCalculationService {
         int baseFare=50;
         float farePerKm;
         if(distanceInKm < 100){
-            farePerKm=5.5f;
+            farePerKm=3.5f;
         }
         else if(distanceInKm < 200){
-            farePerKm=4.0f;
+            farePerKm=3.0f;
         }
         else if(distanceInKm < 500){
-            farePerKm=3.8f;
+            farePerKm=2.6f;
         }
         else{
-            farePerKm=2.6f;
+            farePerKm=2.4f;
         }
         totalFare = (distanceInKm*farePerKm)+baseFare;
         FareCalculationResponseDTO responseDTO = new FareCalculationResponseDTO();
-        responseDTO.setTotalFare(totalFare);
+        responseDTO.setTotalFare(Math.round(totalFare));
 
         return responseDTO;
     }
@@ -91,7 +91,7 @@ public class FareCalculationServiceImpl implements FareCalculationService {
         }
 
         DistanceDTO distanceDTO = new DistanceDTO();
-        distanceDTO.setDistance(distanceInKm);
+        distanceDTO.setDistance(Math.round(distanceInKm));
 
         return distanceDTO;
     }
