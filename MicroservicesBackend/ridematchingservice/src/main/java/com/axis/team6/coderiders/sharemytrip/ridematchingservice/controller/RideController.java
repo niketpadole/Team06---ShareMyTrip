@@ -30,7 +30,6 @@ import com.axis.team6.coderiders.sharemytrip.ridematchingservice.service.RideSer
 
 @RestController
 @RequestMapping("/rides")
-@CrossOrigin("*")
 public class RideController {
     @Autowired
     private RideService rideService;
@@ -181,10 +180,16 @@ public class RideController {
     	return ResponseEntity.ok(rideDetails);
     }
 
-    @PutMapping("/passenger/{passengerRideId}/paid")
-    public ResponseEntity<String> setRideStatusPassenger(@PathVariable Integer passengerRideId){
-    	if(rideService.setRideStatusPassenger(passengerRideId).equals("success"))
-    	return ResponseEntity.ok("success");
-    	return ResponseEntity.badRequest().body("Invalid");
+
+@PutMapping("/passenger/{passengerRideId}/paid")
+public ResponseEntity<String> setRideStatusPassenger(@PathVariable Integer passengerRideId) {
+    String result = rideService.setRideStatusPassenger(passengerRideId);
+    if ("ALL_PAID".equals(result)) {
+        return ResponseEntity.ok("ALL_PAID");
+    } else if ("PARTIAL_PAID".equals(result)) {
+        return ResponseEntity.ok("PARTIAL_PAID");
+    } else {
+        return ResponseEntity.badRequest().body("Invalid");
     }
+}
 }

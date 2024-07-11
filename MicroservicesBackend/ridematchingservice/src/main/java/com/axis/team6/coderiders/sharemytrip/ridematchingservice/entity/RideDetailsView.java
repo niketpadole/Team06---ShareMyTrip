@@ -31,9 +31,6 @@ public class RideDetailsView {
     @Column(name = "publisher_name")
     private String publisherName;
 
-    @Column(name = "passenger_name")
-    private String passengerName;
-
     @Column(name = "publisher_mobile")
     private Long publisherMobile;
 
@@ -59,7 +56,7 @@ public class RideDetailsView {
     private Float distance;
 
     @Column(name = "journey_hours")
-    private Float journeyHours;
+    private String journeyHours;
     
     @Column(name = "publisher_status")
     private String publisherStatus;
@@ -78,8 +75,19 @@ public class RideDetailsView {
     
     @Column(name="passenger_payment_status")
     private String passengerPaymentStatus;
+
+    @Column(name ="passenger_name")
+    private String passengerName;
     
     @Column(name="passenger_mobile")
     private String passengerMobile;
+
+    @Column(name="passenger_email")
+    private String passengerEmail;
+
+    @Column(name="publisher_email")
+    private String publisherEmail;
+
+
     
 }

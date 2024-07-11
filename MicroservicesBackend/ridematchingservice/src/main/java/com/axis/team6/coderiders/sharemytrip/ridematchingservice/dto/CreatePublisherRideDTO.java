@@ -11,7 +11,7 @@ public class CreatePublisherRideDTO {
     private String fromLocation;
     private String toLocation;
     private float distance;
-    private float journeyHours;
+    private String journeyHours;
     private int availableSeats;
     private Date dateOfJourney;
     private Time timeOfJourney;
@@ -19,5 +19,4 @@ public class CreatePublisherRideDTO {
     private String aboutRide;
     private String status="NOT_COMPLETED";
     private String paymentStatus = "PENDING";
-
 }

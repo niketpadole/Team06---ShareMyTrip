@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,7 @@ public class RideServiceImpl implements RideService {
 	@Autowired
 	private RestTemplate restTemplate;
 
-	private static final String USER_MANAGEMENT_SERVICE_URL = "http://localhost:8089/publishers";
+	private static final String USER_MANAGEMENT_SERVICE_URL = "http://apigateway:8095/publishers";
 	
 	//utility fun
 	private RideDetailsDTO convertToDTO(RideDetailsView rideDetailsView) {
@@ -122,17 +123,33 @@ public class RideServiceImpl implements RideService {
 //                .map(this::convertToDTO)
 //                .collect(Collectors.toList());
 	}
-
-
-	
-	// filter rides according to ToLocation and FromLocation
 	@Override
-	public List<PublisherRideDTO> getFilteredRides(String fromLocation, String toLocation,Date dateOfJourney) {
-		List<PublisherRide> publisherRides = publisherRideRepository.findByFromLocationAndToLocationAndDateOfJourney(fromLocation,
-				toLocation,dateOfJourney);
-		return publisherRides.stream().map(ride -> modelMapper.map(ride, PublisherRideDTO.class))
+	public List<PublisherRideDTO> getFilteredRides(String fromLocation, String toLocation, Date dateOfJourney) {
+		if (fromLocation.length() < 3 || toLocation.length() < 3) {
+			throw new IllegalArgumentException("Location strings must be at least 3 characters long");
+		}
+		List<PublisherRide> publisherRides = publisherRideRepository.findByFromLocationAndToLocationAndDateOfJourney(fromLocation, toLocation, dateOfJourney);
+		return publisherRides.stream()
+				.map(ride -> modelMapper.map(ride, PublisherRideDTO.class))
 				.collect(Collectors.toList());
 	}
+
+//	@Override
+//	public List<PublisherRideDTO> getFilteredRides(String fromLocation, String toLocation, Date dateOfJourney) {
+//		List<PublisherRide> publisherRides = publisherRideRepository.findByFromLocationAndToLocationAndDateOfJourney(fromLocation, toLocation, dateOfJourney);
+//		return publisherRides.stream()
+//				.map(ride -> modelMapper.map(ride, PublisherRideDTO.class))
+//				.collect(Collectors.toList());
+//	}
+	
+//	// filter rides according to ToLocation and FromLocation
+//	@Override
+//	public List<PublisherRideDTO> getFilteredRides(String fromLocation, String toLocation,Date dateOfJourney) {
+//		List<PublisherRide> publisherRides = publisherRideRepository.findByFromLocationAndToLocationAndDateOfJourney(fromLocation,
+//				toLocation,dateOfJourney);
+//		return publisherRides.stream().map(ride -> modelMapper.map(ride, PublisherRideDTO.class))
+//				.collect(Collectors.toList());
+//	}
 
 	// cancel ride by passenger
 	public void cancelRide(int passengerRideId) {
@@ -254,18 +271,61 @@ public class RideServiceImpl implements RideService {
 		return rideDetailsDTOs;
 	}
 
-	@Override
-	public String setRideStatusPassenger(Integer passengerRideId) {
-		PassengerRide ride=passengerRideRepository.findById(passengerRideId).get();
-		if(ride==null)
-		return null;
-		else {
-			ride.setPaymentStatus("PAID");
-			ride.setStatus("COMPLETED");
-			passengerRideRepository.save(ride);
-			return "success";
+//	@Override
+//	public String setRideStatusPassenger(Integer passengerRideId) {
+//		String flag=null;
+//		PassengerRide ride=passengerRideRepository.findById(passengerRideId).get();
+//		if(ride==null)
+//			return flag;
+//		else {
+//			ride.setPaymentStatus("PAID");
+//			ride.setStatus("COMPLETED");
+//			passengerRideRepository.save(ride);
+//			Integer publisherRideId=ride.getPublisherRideId();
+//			List<PassengerRide> passengerRides= passengerRideRepository.findByPublisherRideId(publisherRideId);
+//			boolean allPaid = passengerRides.stream()
+//					.allMatch(p -> "PAID".equals(p.getPaymentStatus()));
+//
+//			if (allPaid) {//set res="success"
+//				System.out.println("All passenger rides are paid. Performing the action.");
+//				PublisherRide p=publisherRideRepository.findByPublisherRideId(publisherRideId);
+//				p.setPaymentStatus("PAID");
+//				publisherRideRepository.save(p);
+//				flag="success";
+//			} else {
+//				System.out.println("Not all passenger rides are paid.");
+//				return flag;
+//			}
+//			return flag;
+//		}
+//	}
+@Transactional
+@Override
+public String setRideStatusPassenger(Integer passengerRideId) {
+	PassengerRide ride = passengerRideRepository.findById(passengerRideId).orElse(null);
+	if (ride == null) {
+		return "Invalid";
+	}
+
+	ride.setPaymentStatus("PAID");
+	ride.setStatus("COMPLETED");
+	passengerRideRepository.save(ride);
+
+	Integer publisherRideId = ride.getPublisherRideId();
+	List<PassengerRide> passengerRides = passengerRideRepository.findByPublisherRideId(publisherRideId);
+	boolean allPaid = passengerRides.stream().allMatch(p -> "PAID".equals(p.getPaymentStatus()));
+
+	if (allPaid) {
+		PublisherRide publisherRide = publisherRideRepository.findById(publisherRideId).orElse(null);
+		if (publisherRide != null) {
+			publisherRide.setPaymentStatus("PAID");
+			publisherRideRepository.save(publisherRide);
+			return "ALL_PAID";
 		}
 	}
+	return "PARTIAL_PAID";
+}
+
 
 	@Override
 	public String setRideStatusEnd(Integer id) {

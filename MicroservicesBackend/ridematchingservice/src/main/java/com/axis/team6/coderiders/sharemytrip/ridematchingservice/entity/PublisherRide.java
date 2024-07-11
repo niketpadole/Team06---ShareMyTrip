@@ -38,7 +38,7 @@ public class PublisherRide {
     private float distance;
 
     @Column(name = "journey_hours", nullable = false)
-    private float journeyHours;
+    private String journeyHours;
 
     @Column(name = "available_seats", nullable = false)
     private int availableSeats;
