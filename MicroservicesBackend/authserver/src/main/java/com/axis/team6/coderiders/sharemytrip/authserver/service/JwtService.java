@@ -24,15 +24,28 @@ public class JwtService {
     }
 
 
-    public String generateToken(String userName) {
+    // public String generateToken(String userName) {
+    //     Map<String, Object> claims = new HashMap<>();
+    //     return createToken(claims, userName);
+    // }
+
+    // private String createToken(Map<String, Object> claims, String userName) {
+    //     return Jwts.builder()
+    //             .setClaims(claims)
+    //             .setSubject(userName)
+    //             .setIssuedAt(new Date(System.currentTimeMillis()))
+    //             .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
+    //             .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
+    // }
+     public String generateToken(String userNameWithUserType) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userName);
+        return createToken(claims, userNameWithUserType);
     }
 
-    private String createToken(Map<String, Object> claims, String userName) {
+    private String createToken(Map<String, Object> claims, String userNameWithUserType) {
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(userName)
+                .setSubject(userNameWithUserType)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();

@@ -19,4 +19,5 @@ public class UserCredential {
     private int id;
     private String email;
     private String password;
+    private String userType;
 }

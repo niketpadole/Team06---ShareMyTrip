@@ -4,14 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
 import com.axis.team6.coderiders.sharemytrip.authserver.dto.AuthRequest;
 import com.axis.team6.coderiders.sharemytrip.authserver.entity.UserCredential;
@@ -20,7 +15,6 @@ import com.axis.team6.coderiders.sharemytrip.authserver.service.UserCredentialSe
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
     @Autowired
     private AuthService service;
@@ -37,14 +31,46 @@ public class AuthController {
         return service.saveUser(user);
     }
 
-    @PostMapping("/token")
+    // @PostMapping("/token")
+    // public String getToken(@RequestBody AuthRequest authRequest) {
+    //     Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
+    //     if (authenticate.isAuthenticated()) {
+    //         return service.generateToken(authRequest.getEmail());
+    //     } else {
+    //         throw new RuntimeException("invalid access");
+    //     }
+    // }
+    // @PostMapping("/token")
+    // public String getToken(@RequestBody AuthRequest authRequest) {
+    //     List<UserCredential> users = userCredentialService.findAllByEmail(authRequest.getEmail());
+    //     if (users.isEmpty()) {
+    //         throw new RuntimeException("User not found");
+    //     }
+
+    //     for (UserCredential user : users) {
+    //         Authentication authenticate = authenticationManager.authenticate(
+    //             new UsernamePasswordAuthenticationToken(user.getEmail(), authRequest.getPassword()));
+    //         if (authenticate.isAuthenticated()) {
+    //             return service.generateToken(user.getEmail());
+    //         }
+    //     }
+    //     throw new RuntimeException("Invalid access");
+    // }
+     @PostMapping("/token")
     public String getToken(@RequestBody AuthRequest authRequest) {
-        Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword()));
+        String usernameWithUserType = authRequest.getEmail() + ":" + authRequest.getUserType();
+        Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(usernameWithUserType, authRequest.getPassword()));
         if (authenticate.isAuthenticated()) {
-            return service.generateToken(authRequest.getEmail());
+            return service.generateToken(authRequest.getEmail(), authRequest.getUserType());
         } else {
-            throw new RuntimeException("invalid access");
+            throw new RuntimeException("Invalid access");
         }
+    }
+
+    @PostMapping("/update")
+    public String updateUser(@RequestBody UserCredential user)
+    {
+        return userCredentialService.updateUserCredential(user);
     }
 
     @GetMapping("/validate")

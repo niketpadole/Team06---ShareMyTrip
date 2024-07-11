@@ -21,9 +21,18 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Autowired
     private UserCredentialRepository repository;
 
-    @Override
+    // @Override
+    // public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    //     Optional<UserCredential> credential = repository.findByEmail(username);
+    //     return credential.map(CustomUserDetails::new).orElseThrow(() -> new UsernameNotFoundException("user not found with name :" + username));
+    // }
+     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<UserCredential> credential = repository.findByEmail(username);
-        return credential.map(CustomUserDetails::new).orElseThrow(() -> new UsernameNotFoundException("user not found with name :" + username));
+        String[] parts = username.split(":");
+        String email = parts[0];
+        String userType = parts[1];
+
+        Optional<UserCredential> credential = repository.findByEmailAndUserType(email, userType);
+        return credential.map(CustomUserDetails::new).orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email + " and type: " + userType));
     }
 }
