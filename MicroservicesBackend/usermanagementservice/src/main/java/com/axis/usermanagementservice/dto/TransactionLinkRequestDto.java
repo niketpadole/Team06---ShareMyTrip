@@ -20,11 +20,11 @@ public class TransactionLinkRequestDto {
 //    private Integer reservedSeats;
 //    private String passengerFirstName;
 //    private String passengerLastName;
-    private LocalDateTime timestamp;
-	private Integer passengerId;
-	private Integer passengerRideId;
-	private Integer publisherId;
-	private Integer publisherRideId;
+private LocalDateTime timestamp;
+    private Integer passengerId;
+    private Integer passengerRideId;
+    private Integer publisherId;
+    private Integer publisherRideId;
     private String publisherName;
     private Long publisherMobile;
     private String fromLocation;
@@ -35,13 +35,12 @@ public class TransactionLinkRequestDto {
     private LocalTime departureTime;
     private Float fare;//farePerSeat
     private Float distance;
-    private Float journeyHours;
+    private String journeyHours;
     private String publisherStatus;
-    private String passengerFirstName;
-    private String passengerLastName;
-    private String passengerEmail;
     private String publisherPaymentStatus;
     private String passengerPaymentStatus;
+    private String passengerName;
+    private String passengerEmail;
     private String passengerMobile;
     private Integer passengerCount;
 	

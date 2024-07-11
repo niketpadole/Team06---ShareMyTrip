@@ -13,7 +13,7 @@ public class PublisherRideDTO {
     private String fromLocation;
     private String toLocation;
     private float distance;
-    private float journeyHours;
+    private String journeyHours;
     private int availableSeats;
     private int reservedSeats;
     private Date dateOfJourney;
@@ -23,4 +23,5 @@ public class PublisherRideDTO {
     private java.sql.Timestamp timestamp;
     private String status="NOT_COMPLETED";
     private String paymentStatus = "PENDING";
+    private float totalEarnings;
 }

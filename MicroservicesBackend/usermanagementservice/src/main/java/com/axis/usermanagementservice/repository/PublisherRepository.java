@@ -12,4 +12,9 @@ import com.axis.usermanagementservice.entity.Publisher;
 public interface PublisherRepository extends JpaRepository<Publisher, Integer> {
 
     Publisher findByEmail(String email);
+
+	Publisher findByDrivingLicense(String drivingLicense);
+	Publisher findByAadharCard(String aadharCard);
+
+	
 }

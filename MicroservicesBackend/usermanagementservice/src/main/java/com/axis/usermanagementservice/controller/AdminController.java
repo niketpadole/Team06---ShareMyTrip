@@ -35,7 +35,6 @@ import com.axis.usermanagementservice.service.PublisherService;
 
 @RestController
 @RequestMapping("/user/admins")
-@CrossOrigin("*")
 public class AdminController {
 
     @Autowired
@@ -54,8 +53,8 @@ public class AdminController {
     @LoadBalanced
     private RestTemplate restTemplate;
     
-    private static final String AUTH_SERVICE_URL = "http://authserver/auth/register";
-    private static final String AUTH_SERVICE="http://authserver";
+    private static final String AUTH_SERVICE_URL = "http://authserver:9898/auth/register";
+    private static final String  TOKEN_SERVER_URL="http://authserver:9898/auth/token";
     @GetMapping
     public ResponseEntity<List<AdminDto>> getAllAdmins() {
         List<Admin> admins = adminService.getAllAdmins();
@@ -81,7 +80,8 @@ public class AdminController {
         	return new ResponseEntity<>("Admin Exists..Please Login!!!",HttpStatus.CONFLICT);
         return new ResponseEntity<>("Admin added!!!",HttpStatus.OK);
     }
-
+    
+ 
     @PutMapping("/{id}")
     public ResponseEntity<AdminDto> updateAdmin(@PathVariable int id, @RequestBody RegisterRequest registerRequest) {
         Admin existingAdmin = adminService.getAdminById(id)
@@ -102,24 +102,39 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/login")
+  //   @PostMapping("/login")
+  //   public ResponseEntity<AdminDto> loginAdmin(@RequestBody LoginRequest loginRequest) {
+  //       AdminDto admin = adminService.loginAdmin(loginRequest.getEmail(), loginRequest.getPassword());
+  //       if (admin != null) {
+		// 	AuthRequest authRequest = new AuthRequest(loginRequest.getEmail(), loginRequest.getPassword());
+		// 	ResponseEntity<String> authResponse = restTemplate.postForEntity(AUTH_SERVICE+"/auth/token",authRequest, String.class);
+		// 	// System.out.println("Authresponse.getbody======="+authResponse.getBody());
+		// 	if (authResponse.getStatusCode() == HttpStatus.OK && authResponse.getBody() != null) {
+		// 		admin.setToken(authResponse.getBody());
+		// 		return ResponseEntity.ok(admin);
+		// 	} else {
+		// 		return ResponseEntity.status(authResponse.getStatusCode()).body(null);
+		// 	}
+		// } else {
+		// 	return ResponseEntity.status(401).body(null);
+		// }
+  //   }
+     @PostMapping("/login")
     public ResponseEntity<AdminDto> loginAdmin(@RequestBody LoginRequest loginRequest) {
         AdminDto admin = adminService.loginAdmin(loginRequest.getEmail(), loginRequest.getPassword());
         if (admin != null) {
-			AuthRequest authRequest = new AuthRequest(loginRequest.getEmail(), loginRequest.getPassword());
-			ResponseEntity<String> authResponse = restTemplate.postForEntity(AUTH_SERVICE+"/auth/token",authRequest, String.class);
-			// System.out.println("Authresponse.getbody======="+authResponse.getBody());
-			if (authResponse.getStatusCode() == HttpStatus.OK && authResponse.getBody() != null) {
-				admin.setToken(authResponse.getBody());
-				return ResponseEntity.ok(admin);
-			} else {
-				return ResponseEntity.status(authResponse.getStatusCode()).body(null);
-			}
-		} else {
-			return ResponseEntity.status(401).body(null);
-		}
+            AuthRequest authRequest = new AuthRequest(loginRequest.getEmail(), loginRequest.getPassword(), "admin");
+            ResponseEntity<String> authResponse = restTemplate.postForEntity(TOKEN_SERVER_URL, authRequest, String.class);
+            if (authResponse.getStatusCode() == HttpStatus.OK && authResponse.getBody() != null) {
+                admin.setToken(authResponse.getBody());
+                return ResponseEntity.ok(admin);
+            } else {
+                return ResponseEntity.status(authResponse.getStatusCode()).body(null);
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
     }
-    
     
     //View publishers
     @GetMapping("/publishers")

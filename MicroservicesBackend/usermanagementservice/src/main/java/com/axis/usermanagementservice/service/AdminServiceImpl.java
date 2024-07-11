@@ -20,6 +20,7 @@ import com.axis.usermanagementservice.entity.Publisher;
 import com.axis.usermanagementservice.repository.AdminRepository;
 import com.axis.usermanagementservice.repository.PassengerRepository;
 import com.axis.usermanagementservice.repository.PublisherRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -51,27 +52,44 @@ public class AdminServiceImpl implements AdminService {
         return adminRepository.findById(id);
     }
 
-    public Admin saveAdmin(Admin admin) {
-    	//password hashing
-        //admin.setPassword(passwordEncoder.encode(admin.getPassword()));
-        if(adminRepository.findByEmail(admin.getEmail())!=null)
-        	return null;
-        else
-        {
-        	AuthRequest authRequest=new AuthRequest(admin.getEmail(), admin.getPassword());
-        	//rest call to authservice to register there also
-        	ResponseEntity<Void> response = restTemplate.postForEntity("http://authserver/auth/register", authRequest, Void.class);
+    // public Admin saveAdmin(Admin admin) {
+    // 	//password hashing
+    //     //admin.setPassword(passwordEncoder.encode(admin.getPassword()));
+    //     if(adminRepository.findByEmail(admin.getEmail())!=null)
+    //     	return null;
+    //     else
+    //     {
+    //     	AuthRequest authRequest=new AuthRequest(admin.getEmail(), admin.getPassword());
+    //     	//rest call to authservice to register there also
+    //     	ResponseEntity<Void> response = restTemplate.postForEntity("http://authserver:9898/auth/register", authRequest, Void.class);
 
-            if (response.getStatusCode().is2xxSuccessful()) {
-            	admin.setPassword(passwordEncoder.encode(admin.getPassword()));
-            	return adminRepository.save(admin);
+    //         if (response.getStatusCode().is2xxSuccessful()) {
+    //         	admin.setPassword(passwordEncoder.encode(admin.getPassword()));
+    //         	return adminRepository.save(admin);
                 
-            } else {
-                // Handle the case when registration in auth service fails
-                throw new RuntimeException("Invalid request");
-            }
-        }
+    //         } else {
+    //             // Handle the case when registration in auth service fails
+    //             throw new RuntimeException("Invalid request");
+    //         }
+    //     }
         
+    // }
+	 @Transactional
+    public Admin saveAdmin(Admin admin) {
+        if (adminRepository.findByEmail(admin.getEmail()) != null)
+            return null;
+
+        AuthRequest authRequest = new AuthRequest(admin.getEmail(), admin.getPassword(), "admin");
+
+
+        ResponseEntity<Void> response = restTemplate.postForEntity("http://authserver:9898/auth/register", authRequest, Void.class);
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            admin.setPassword(passwordEncoder.encode(admin.getPassword()));
+            return adminRepository.save(admin);
+        } else {
+            throw new RuntimeException("Failed to register admin");
+        }
     }
 
     public Admin updateAdmin(Admin admin) {

@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.axis.usermanagementservice.dto.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
@@ -17,14 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.axis.usermanagementservice.dto.AuthRequest;
-import com.axis.usermanagementservice.dto.CreatePassengerRideDTO;
-import com.axis.usermanagementservice.dto.PassengerDTO;
-import com.axis.usermanagementservice.dto.PassengerRegistrationRequest;
-import com.axis.usermanagementservice.dto.PublisherRideDTO;
-import com.axis.usermanagementservice.dto.RideDetailsDTO;
-import com.axis.usermanagementservice.dto.TransactionLinkRequestDto;
 import com.axis.usermanagementservice.entity.Passenger;
 import com.axis.usermanagementservice.exception.PassengerNotFoundException;
 import com.axis.usermanagementservice.repository.PassengerRepository;
@@ -33,9 +28,9 @@ import com.axis.usermanagementservice.repository.PublisherRepository;
 @Service
 public class PassengerServiceImpl implements PassengerService {
 
-	private static final String AUTH_SERVICE_URL = "http://authserver/auth/register";
-	private static final String RIDE_MATCHING_SERVICE_URL = "http://ridematchingservice/rides";
-	private static final String PAYMENT_SERVICE_URL="http://paymentgatewayservice/api/transactions";
+	private static final String AUTH_SERVICE_URL = "http://apigateway:8095/auth/register";
+	private static final String RIDE_MATCHING_SERVICE_URL = "http://apigateway:8095/rides";
+	private static final String PAYMENT_SERVICE_URL="http://apigateway:8095/api/transactions";
 
 	@Autowired
 	private PassengerRepository passengerRepository;
@@ -53,24 +48,49 @@ public class PassengerServiceImpl implements PassengerService {
 	@Autowired
 	private ModelMapper modelMapper;
 
+	// public ResponseEntity<?> registerPassenger(PassengerRegistrationRequest registrationRequest) {
+	// 	Passenger passenger = modelMapper.map(registrationRequest, Passenger.class);
+	// 	passenger.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
+	// 	passenger.setTimestamp(new Timestamp(System.currentTimeMillis()));
+	// 	// Register passenger credentials in the auth service
+	// 	if (passengerRepository.findByEmail(passenger.getEmail()) != null) {
+	// 		return new ResponseEntity<>("Email is already registered..Please Login!!!", HttpStatus.CONFLICT);
+	// 	}
+	// 	if (passengerRepository.findByAadharCard(passenger.getAadharCard()) != null) {
+	// 		return new ResponseEntity<>("Aadhar already registered..Please Login!!!", HttpStatus.CONFLICT);
+	// 	}
+	// 	else {
+	// 		AuthRequest authRequest = new AuthRequest();
+	// 		authRequest.setEmail(registrationRequest.getEmail());
+	// 		authRequest.setPassword(registrationRequest.getPassword());
+	// 		ResponseEntity<Void> response = restTemplate.postForEntity(AUTH_SERVICE_URL, authRequest, Void.class);
+
+	// 		if (response.getStatusCode().is2xxSuccessful()) {
+	// 			passengerRepository.save(passenger);
+	// 			return new ResponseEntity<>("Registration successful", HttpStatus.CREATED);
+	// 		} else {
+	// 			// Handle the case when registration in auth service fails
+	// 			return new ResponseEntity<>("Authentication server error", HttpStatus.BAD_GATEWAY);
+	// 		}
+	// 	}
+	// }
 	public ResponseEntity<?> registerPassenger(PassengerRegistrationRequest registrationRequest) {
 		Passenger passenger = modelMapper.map(registrationRequest, Passenger.class);
 		passenger.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
 		passenger.setTimestamp(new Timestamp(System.currentTimeMillis()));
-		// Register passenger credentials in the auth service
 		if (passengerRepository.findByEmail(passenger.getEmail()) != null) {
 			return new ResponseEntity<>("Email is already registered..Please Login!!!", HttpStatus.CONFLICT);
+		}
+		if (passengerRepository.findByAadharCard(passenger.getAadharCard()) != null) {
+			return new ResponseEntity<>("Aadhar already registered..Please Login!!!", HttpStatus.CONFLICT);
 		} else {
-			AuthRequest authRequest = new AuthRequest();
-			authRequest.setEmail(registrationRequest.getEmail());
-			authRequest.setPassword(registrationRequest.getPassword());
+			AuthRequest authRequest = new AuthRequest(registrationRequest.getEmail(), registrationRequest.getPassword(), "passenger");
 			ResponseEntity<Void> response = restTemplate.postForEntity(AUTH_SERVICE_URL, authRequest, Void.class);
 
 			if (response.getStatusCode().is2xxSuccessful()) {
 				passengerRepository.save(passenger);
 				return new ResponseEntity<>("Registration successful", HttpStatus.CREATED);
 			} else {
-				// Handle the case when registration in auth service fails
 				return new ResponseEntity<>("Authentication server error", HttpStatus.BAD_GATEWAY);
 			}
 		}
@@ -183,15 +203,15 @@ public class PassengerServiceImpl implements PassengerService {
 		rideDetails.setOrderId(rideDetails.getPassengerMobile()+ LocalDateTime.now());
 			String res=restTemplate.postForObject(PAYMENT_SERVICE_URL+"?orderId="+rideDetails.getOrderId(), rideDetails, String.class);
 			return res;
-			
-			
+
+
 	}
 
 	@Override
 	public String setRideStatus(Integer passengerRideId) {
 		//restTemplate.put(RIDE_MATCHING_SERVICE_URL+"/passenger/"+passengerRideId+"/paid", null); //returns void so use restTemplate.exchange()
-		
-		
+
+
 		 // Create an HttpEntity with no body (null)
         HttpEntity<Void> requestEntity = new HttpEntity<>(null);
 
@@ -199,9 +219,54 @@ public class PassengerServiceImpl implements PassengerService {
         ResponseEntity<String> response = restTemplate.exchange(RIDE_MATCHING_SERVICE_URL+"/passenger/"+passengerRideId+"/paid", HttpMethod.PUT, requestEntity, String.class);
 
         return response.getBody();
-		
+
+	}
+	// @Override
+	// public void updatePassword(String email, String newPassword) {
+	// 	Passenger passenger = passengerRepository.findByEmail(email);
+	// 	if(passenger != null)
+	// 	{
+	// 		String encodedPassword = passwordEncoder.encode(newPassword);
+	// 		passenger.setPassword(encodedPassword);
+	// 		passengerRepository.save(passenger);
+	// 		AuthRequest authRequest = new AuthRequest();
+	// 		authRequest.setEmail(email);
+	// 		authRequest.setPassword(newPassword);
+	// 		String response = restTemplate.postForObject("http://authserver:9898/auth/update",authRequest,String.class);
+	// 	}
+	// 	else{
+	// 		throw  new PassengerNotFoundException("User Not Found");
+	// 	}
+	// }
+	@Override
+	public void updatePassword(String email, String newPassword, String userType) {
+		Passenger passenger = passengerRepository.findByEmail(email);
+		if (passenger != null) {
+			String encodedPassword = passwordEncoder.encode(newPassword);
+			passenger.setPassword(encodedPassword);
+			passengerRepository.save(passenger);
+
+			AuthRequest authRequest = new AuthRequest(email, newPassword, userType);
+			String response = restTemplate.postForObject("http://authserver:9898/auth/update", authRequest, String.class);
+			System.out.println(response);
+		} else {
+			throw new PassengerNotFoundException("User Not Found");
+		}
 	}
 
-	
-	
+	@Override
+	public List<TransactionDetailsDTO> getTransactions(Integer passengerId) {
+		TransactionDetailsDTO[] res=restTemplate.getForObject(PAYMENT_SERVICE_URL+"/"+passengerId,TransactionDetailsDTO[].class);
+		return Arrays.asList(res);
+	}
+
+//	@Override
+//	public void updatePaymentStatus(UpdatePaymentStatusDTO updatePaymentStatusDTO) {
+//		Passenger passenger = passengerRepository.findById(updatePaymentStatusDTO.getPassengerId())
+//				.orElseThrow(() -> new PassengerNotFoundException("Passenger not found with id: " + updatePaymentStatusDTO.getPassengerId()));
+//		passenger.setPaymentStatus(updatePaymentStatusDTO.getPaymentStatus());
+//		passengerRepository.save(passenger);
+//	}
+
+
 }

@@ -10,4 +10,6 @@ import com.axis.usermanagementservice.entity.Passenger;
 public interface PassengerRepository extends JpaRepository<Passenger, Integer> {
 
     Passenger findByEmail(String email);
+
+	Passenger findByAadharCard(String aadharCard);
 }

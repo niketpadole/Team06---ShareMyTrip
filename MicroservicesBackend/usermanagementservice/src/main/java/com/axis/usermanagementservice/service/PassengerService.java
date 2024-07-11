@@ -3,15 +3,10 @@ package com.axis.usermanagementservice.service;
 import java.util.Date;
 import java.util.List;
 
+import com.axis.usermanagementservice.dto.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import com.axis.usermanagementservice.dto.CreatePassengerRideDTO;
-import com.axis.usermanagementservice.dto.PassengerDTO;
-import com.axis.usermanagementservice.dto.PassengerRegistrationRequest;
-import com.axis.usermanagementservice.dto.PublisherRideDTO;
-import com.axis.usermanagementservice.dto.RideDetailsDTO;
-import com.axis.usermanagementservice.dto.TransactionLinkRequestDto;
 import com.axis.usermanagementservice.entity.Passenger;
 
 @Service
@@ -51,4 +46,12 @@ public interface PassengerService {
 	String payRide(TransactionLinkRequestDto rideDetails);
 
 	String setRideStatus(Integer integer);
+    // void updatePassword(String email, String newPassword);
+	void updatePassword(String email, String newPassword,String userType);
+
+    List<TransactionDetailsDTO> getTransactions(Integer passengerId);
+
+
+//        void updatePaymentStatus(UpdatePaymentStatusDTO updatePaymentStatusDTO);
+
 }

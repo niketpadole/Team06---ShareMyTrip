@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import com.axis.usermanagementservice.dto.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -25,21 +26,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import com.axis.usermanagementservice.dto.AuthRequest;
-import com.axis.usermanagementservice.dto.CreatePassengerRideDTO;
-import com.axis.usermanagementservice.dto.LoginRequest;
-import com.axis.usermanagementservice.dto.PassengerDTO;
-import com.axis.usermanagementservice.dto.PassengerRegistrationRequest;
-import com.axis.usermanagementservice.dto.PassengerUpdateDTO;
-import com.axis.usermanagementservice.dto.PublisherRideDTO;
-import com.axis.usermanagementservice.dto.RideDetailsDTO;
-import com.axis.usermanagementservice.dto.TransactionLinkRequestDto;
 import com.axis.usermanagementservice.entity.Passenger;
 import com.axis.usermanagementservice.service.PassengerService;
 
 @RestController
 @RequestMapping("/user/passengers")
-@CrossOrigin("*")
 public class PassengerController {
 
 	@Autowired
@@ -54,8 +45,9 @@ public class PassengerController {
 
 	// private static final String AUTH_SERVICE_URL =
 	// "http://authservice/auth/register";
-	private static final String RIDE_MATCHING_SERVICE_URL = "http://ridematchingservice/rides/passenger";
-	private static final String AUTH_SERVER_URL="http://authserver";
+	private static final String RIDE_MATCHING_SERVICE_URL = "http://apigateway:8095/rides/passenger";
+	private static final String AUTH_SERVER_URL="http://apigateway:8095";
+	private static final String EMAIL_SERVICE_URL="http://apigateway:8095/email";
 
 	@PostMapping("/register")
 	public ResponseEntity<?> registerPassenger(@RequestBody PassengerRegistrationRequest registrationRequest) {
@@ -63,16 +55,33 @@ public class PassengerController {
 
 	}
 
-	@PostMapping("/login")
+// 	@PostMapping("/login")
+// 	public ResponseEntity<PassengerDTO> loginPassenger(@RequestBody LoginRequest loginRequest) {
+// 		PassengerDTO passenger = passengerService.loginPassenger(loginRequest.getEmail(), loginRequest.getPassword());
+// 		if (passenger != null) {
+// 			AuthRequest authRequest = new AuthRequest(loginRequest.getEmail(), loginRequest.getPassword());
+// 			ResponseEntity<String> authResponse = restTemplate.postForEntity(AUTH_SERVER_URL+"/auth/token", authRequest, String.class);
+// 			if (authResponse.getStatusCode() == HttpStatus.OK && authResponse.getBody() != null) {
+// 				String token = authResponse.getBody();
+// //				HttpHeaders headers = new HttpHeaders();
+// //				headers.set("Authorization", "Bearer " + token);
+// 				passenger.setToken(token);
+// 				return ResponseEntity.ok().body(passenger);
+// 			} else {
+// 				return ResponseEntity.status(authResponse.getStatusCode()).body(null);
+// 			}
+// 		} else {
+// 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+// 		}
+// 	}
+        @PostMapping("/login")
 	public ResponseEntity<PassengerDTO> loginPassenger(@RequestBody LoginRequest loginRequest) {
 		PassengerDTO passenger = passengerService.loginPassenger(loginRequest.getEmail(), loginRequest.getPassword());
 		if (passenger != null) {
-			AuthRequest authRequest = new AuthRequest(loginRequest.getEmail(), loginRequest.getPassword());
+			AuthRequest authRequest = new AuthRequest(loginRequest.getEmail(), loginRequest.getPassword(), "passenger");
 			ResponseEntity<String> authResponse = restTemplate.postForEntity(AUTH_SERVER_URL+"/auth/token", authRequest, String.class);
 			if (authResponse.getStatusCode() == HttpStatus.OK && authResponse.getBody() != null) {
 				String token = authResponse.getBody();
-//				HttpHeaders headers = new HttpHeaders();
-//				headers.set("Authorization", "Bearer " + token);
 				passenger.setToken(token);
 				return ResponseEntity.ok().body(passenger);
 			} else {
@@ -82,7 +91,6 @@ public class PassengerController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
 		}
 	}
-
 	@GetMapping
 	public ResponseEntity<List<PassengerDTO>> getAllPassengers() {
 		List<PassengerDTO> passengers = passengerService.getAllPassengers();
@@ -191,19 +199,58 @@ public class PassengerController {
     @PostMapping("/pay")
     public ResponseEntity<String> payRide(@RequestBody TransactionLinkRequestDto rideDetails){
     	String res=passengerService.payRide(rideDetails);
-    //	if(res==null)//Payment not done
-    		//return new ResponseEntity<String>("Payment unsuccessful",HttpStatus.EXPECTATION_FAILED);
-//    	else//payment successful
-//    	{
-//    		//update ride status of passenger to Completed and payment_status to PAID
-//    		String response=passengerService.setRideStatus(rideDetails.getPassengerRideId());
-//    		if(response=="success")
-//    			return new ResponseEntity<String>("success",HttpStatus.ACCEPTED);
-//    		return new ResponseEntity<String>("failed",HttpStatus.BAD_GATEWAY);
-//    	}
-    		
-    	return ResponseEntity.ok(res);//
+		return ResponseEntity.ok(res);
     }
-	
+	//Reset password
+	@PostMapping("/reset-password/{email}")
+	public ResponseEntity<?> resetPassword(@PathVariable String email) {
+		PassengerDTO resetPassenger = passengerService.getPassengerByEmail(email);
+		if (resetPassenger == null) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User Not Found");
+		}
+		String otpServiceUrl = EMAIL_SERVICE_URL + "/send-otp/" + email;
+
+		ResponseEntity<String> emailResponse = restTemplate.postForEntity(otpServiceUrl, null, String.class);
+
+		if (emailResponse.getStatusCode() == HttpStatus.OK) {
+			return ResponseEntity.ok("OTP sent successfully");
+		} else {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send OTP");
+		}
+	}
+	@PostMapping("/verify-otp/{email}/{otp}")
+	public ResponseEntity<?> verifyOtp(@PathVariable String email, @PathVariable String otp) {
+		String verifyOtpServiceUrl = EMAIL_SERVICE_URL + "/verify-otp/" + email + "/" + otp;
+
+		ResponseEntity<String> verifyOtpResponse = restTemplate.postForEntity(verifyOtpServiceUrl, null, String.class);
+
+		if (verifyOtpResponse.getStatusCode() == HttpStatus.OK && "OTP verified successfully".equals(verifyOtpResponse.getBody())) {
+			return ResponseEntity.ok("OTP verified successfully");
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid OTP");
+		}
+	}
+
+// 	@PutMapping("/update-password")
+// 	public ResponseEntity<?> updatePassword(@RequestParam String email, @RequestParam String newPassword) {
+// //		PassengerDTO passenger = passengerService.getPassengerByEmail(email);
+// //		System.out.println(passenger.toString());
+// //		if (passenger == null) {
+// //			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User Not Found");
+// //		}
+// 		passengerService.updatePassword(email, newPassword);
+// 		return ResponseEntity.ok("Password reset successfully");
+// 	}
+	@PutMapping("/update-password")
+	public ResponseEntity<?> updatePassword(@RequestParam String email, @RequestParam String newPassword) {
+		passengerService.updatePassword(email, newPassword, "passenger");
+		return ResponseEntity.ok("Password reset successfully");
+	}
+
+	@GetMapping("/{passengerId}/transactions")
+	public ResponseEntity<List<TransactionDetailsDTO>> getTransactions(@PathVariable Integer passengerId){
+		List<TransactionDetailsDTO> response= passengerService.getTransactions(passengerId);
+		return ResponseEntity.ok(response);
+	}
 	
 }
