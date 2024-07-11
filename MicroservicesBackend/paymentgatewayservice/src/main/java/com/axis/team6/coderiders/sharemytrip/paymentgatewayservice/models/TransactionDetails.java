@@ -26,7 +26,7 @@ public class TransactionDetails extends BaseModel {
 
 	private Integer passengerId;
 	private Date dateOfJourney;
-	private Double totalFare;
+	private Float totalFare;
 	private Integer publisherRideId;
 	private Integer passengerRideId;
 	private Integer publisherId;

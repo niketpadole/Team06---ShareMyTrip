@@ -32,7 +32,7 @@ public class RazorPayGateway implements TransactionGateway{
 
         //*********change this***********
         //FareCalculation
-        paymentLinkRequest.put("amount",transactionLinkRequestDto.getPassengerCount()*transactionLinkRequestDto.getFare()*100);
+        paymentLinkRequest.put("amount",transactionLinkRequestDto.getFare()*100);
         paymentLinkRequest.put("currency","INR");
         paymentLinkRequest.put("expire_by", LocalDate.now().plusDays(7).atStartOfDay(ZoneId.systemDefault()).toEpochSecond());
         paymentLinkRequest.put("reference_id",transactionLinkRequestDto.getOrderId());
@@ -48,7 +48,7 @@ public class RazorPayGateway implements TransactionGateway{
         //notes.put("policy_name","Jeevan Bima");
         notes.put("Passenger","paid for ride");
         paymentLinkRequest.put("notes",notes);
-        paymentLinkRequest.put("callback_url","http://localhost:5173/paymentSucess");
+        paymentLinkRequest.put("callback_url","http://sharemytrip.in.net/paymentSucess");
         paymentLinkRequest.put("callback_method","get");
         PaymentLink payment=null;
         try {

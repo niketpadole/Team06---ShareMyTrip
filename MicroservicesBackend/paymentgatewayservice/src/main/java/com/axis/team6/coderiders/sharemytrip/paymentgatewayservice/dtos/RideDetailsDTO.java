@@ -22,12 +22,14 @@ public class RideDetailsDTO {
     private Time departureTime;
     private Float fare;//farePerSeat
     private Float distance;
-    private Float journeyHours;
+    private String journeyHours;
     private String publisherStatus;
     private Integer publisherRideId;
     private Integer passengerCount;
     private String publisherPaymentStatus;
     private String passengerPaymentStatus;
     private String passengerMobile;
+    private String passengerEmail;
+    private String publisherEmail;
 
 }

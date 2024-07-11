@@ -37,7 +37,7 @@ public class TransactionLinkRequestDto {
     private LocalTime departureTime;
     private Float fare;//farePerSeat
     private Float distance;
-    private Float journeyHours;
+    private String journeyHours;
     private String publisherStatus;
     private String publisherPaymentStatus;
     private String passengerPaymentStatus;
