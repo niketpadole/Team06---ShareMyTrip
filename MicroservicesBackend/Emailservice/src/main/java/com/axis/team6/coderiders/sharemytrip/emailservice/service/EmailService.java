@@ -80,5 +80,49 @@ public class EmailService {
 
         return "OTP verified successfully";
     }
+    public void sendRideConfirmationEmail(String email) {
+        try {
+            emailUtil.sendRideConfirmation(email);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Error sending ride confirmation email to: " + email);
+        }
+    }
+    public void sendRideBookedEmail(String email) {
+        try {
+            emailUtil.sendRideBookedConfirmation(email);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Error sending ride booked confirmation email to: " + email);
+        }
+    }
+
+    public void sendPassengerRideCanceledEmail(String email) {
+        try {
+            emailUtil.sendRideCanceledNotification(email);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Error sending ride canceled notification email to: " + email);
+        }
+    }
+    public void sendPublisherRideCanceledEmail(String email) {
+        try {
+            emailUtil.sendPublisherRideCanceledNotification(email);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Error sending ride canceled notification email to: " + email);
+        }
+    }
+    public void sendPublisherRideCanceledConfirmationToPassenger(String email) {
+        try {
+            emailUtil.sendPublisherRideCanceledNotificationToPassenger(email);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Error sending ride canceled notification email to: " + email);
+        }
+    }
+    public void sendPassengerRideCanceledConfirmationToPublisher(String email) {
+        try {
+            emailUtil.sendPassengerRideCanceledNotificationToPublisher(email);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Error sending ride canceled notification email to: " + email);
+        }
+    }
+
 }
 

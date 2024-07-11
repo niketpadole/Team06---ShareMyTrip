@@ -22,4 +22,30 @@ private EmailService emailService;
     public ResponseEntity<String> verifyOtp(@PathVariable String email, @PathVariable String otp) {
         return ResponseEntity.ok(emailService.verifyOtp(email, otp));
     }
+
+    @PostMapping("/send-publisher-confirmation")
+    public void sendPublisherConfirmation(@RequestParam String publisherEmail) {
+        emailService.sendRideConfirmationEmail(publisherEmail);
+    }
+    @PostMapping("/send-passenger-booked-confirmation")
+    public void sendPassengerBookedConfirmation(@RequestParam String passengerEmail) {
+        emailService.sendRideBookedEmail(passengerEmail);
+    }
+
+    @PostMapping("/send-passenger-canceled-notification")
+    public void sendPassengerCanceledNotification(@RequestParam String passengerEmail) {
+        emailService.sendPassengerRideCanceledEmail(passengerEmail);
+    }
+    @PostMapping("/send-publisher-canceled-notification")
+    public void sendPublisherCanceledConfirmation(@RequestParam String publisherEmail) {
+        emailService.sendPublisherRideCanceledEmail(publisherEmail);
+    }
+    @PostMapping("/send-publisher-canceled-notification-passenger")
+    public void sendPublisherRideCanceledConfirmationToPassenger(@RequestParam String passengerEmail) {
+        emailService.sendPublisherRideCanceledConfirmationToPassenger(passengerEmail);
+    }
+    @PostMapping("/send-pasenger-canceled-notification-publisher")
+    public void sendPassengerRideCanceledEmailToPublisher(@RequestParam String publisherEmail) {
+        emailService.sendPassengerRideCanceledConfirmationToPublisher(publisherEmail);
+    }
 }
