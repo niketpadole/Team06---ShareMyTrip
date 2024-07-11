@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Layout from "../Components/Layouts/Layout";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const PassangerRegister = () => {
   const navigate = useNavigate();
@@ -12,8 +13,9 @@ const PassangerRegister = () => {
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
   const [dateOfBirth, setDateOfBirth] = useState("");
-  const [aadhar, setAadhar] = useState(null);
+  const [aadhar, setAadhar] = useState("");
   const [miniBio, setMiniBio] = useState("");
   const [errorMessageFirstName, setErrorMessageFirstName] = useState("");
   const [errorMessageLastName, setErrorMessageLastName] = useState("");
@@ -29,15 +31,21 @@ const PassangerRegister = () => {
       setErrorMessageFirstName("First Name is required");
       isValid = false;
     }
+    else if (!/^[a-zA-Z]+$/.test(firstName)) {
+     setErrorMessageFirstName('First Name must be a string');
+    }
     if (!lastName) {
       setErrorMessageLastName("Last Name is required");
       isValid = false;
     }
+    else if (!/^[a-zA-Z]+$/.test(lastName)) {
+      setErrorMessageLastName('Last Name must be a string');
+     }
     if (!mobile) {
       setErrorMessageMobile("Mobile number is required");
       isValid = false;
     } else if (!/^[789]\d{9}$/.test(mobile)) {
-      setErrorMessageMobile("Mobile number should be 10 digits Should start with 7|8|9");
+      setErrorMessageMobile("Mobile number should be 10 digits and start with 7, 8, or 9");
       isValid = false;
     }
     if (!email) {
@@ -68,10 +76,13 @@ const PassangerRegister = () => {
         isValid = false;
       }
     }
-    // if (!aadhar) {
-    //   setErrorMessageAadhar("Aadhar Card is required");
-    //   isValid = false;
-    // }
+    if (!aadhar) {
+      setErrorMessageAadhar("Aadhar Card number is required");
+      isValid = false;
+    } else if (!/^\d{12}$/.test(aadhar)) {
+      setErrorMessageAadhar("Aadhar Card number must be 12 digits");
+      isValid = false;
+    }
 
     return isValid;
   };
@@ -82,7 +93,7 @@ const PassangerRegister = () => {
       const validation = validate();
       if (validation) {
         const response = await axios.post(
-          "http://localhost:8089/user/passengers/register",
+          "https://api.sharemytrip.xyz/user/passengers/register",
           {
             firstName,
             lastName,
@@ -90,25 +101,24 @@ const PassangerRegister = () => {
             email,
             password,
             dateOfBirth,
-            aadhar,
+            "aadharCard": aadhar,
             miniBio,
           }
         );
-        if (response.status == 200) {
-          toast.success("Passanger Reggister Succesful", {
+        if (response.status === 200) {
+          toast.success("Passenger Registration Successful", {
             duration: 3000,
           });
           navigate("/log-in/passanger");
         } else {
           toast.error("Registration Failed");
         }
-      }
-      else{
+      } else {
         console.log("Validation Failed");
       }
     } catch (error) {
       console.log(error);
-      toast.error("Sever Error");
+      toast.error("Server Error");
     }
   };
 
@@ -127,7 +137,7 @@ const PassangerRegister = () => {
             <h1 className="mb-5 text-[#ff6f61] text-2xl md:text-3xl">
               Passenger Register
             </h1>
-            <form action="/login" method="post" className="text-left">
+            <form onSubmit={register} className="text-left">
               <div className="mb-5">
                 <label htmlFor="firstName" className="block mb-2 text-[#333]">
                   First Name
@@ -202,20 +212,28 @@ const PassangerRegister = () => {
                   <p className="text-red-500 text-sm">{errorMessageEmail}</p>
                 )}
               </div>
-              <div className="mb-5">
+              <div className="mb-5 text-left relative">
                 <label htmlFor="password" className="block mb-2 text-[#333]">
                   Password
                 </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full p-2 border border-[#ddd] rounded-md"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="w-full p-2 border border-[#ddd] rounded-md pr-10"
+                  />
+                  <span
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-[#333]"
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </span>
+                </div>
                 {errorMessagePassword && (
                   <p className="text-red-500 text-sm">{errorMessagePassword}</p>
                 )}
@@ -244,13 +262,14 @@ const PassangerRegister = () => {
                   Aadhaar Card
                 </label>
                 <input
-                  type="file"
+                  type="text"
                   id="aadhaar"
                   name="aadhaar"
-                  accept="image/*"
+                  placeholder="Enter your 12-digit Aadhaar number"
+                  value={aadhar}
+                  onChange={(e) => setAadhar(e.target.value)}
                   required
                   className="w-full p-2 border border-[#ddd] rounded-md"
-                  onChange={(e) => setAadhar(e.target.files[0])}
                 />
                 {errorMessageAadhar && (
                   <p className="text-red-500 text-sm">{errorMessageAadhar}</p>

@@ -44,7 +44,7 @@ const BookRide = () => {
       if (validate()) {
         const formattedDate = new Date(date_of_journey).toISOString().split('T')[0];
         const response = await axios.get(
-          `http://localhost:8089/user/passengers/rides/filter`,
+          `https://api.sharemytrip.xyz/user/passengers/rides/filter`,
           {
             params: {
               fromLocation,
@@ -54,7 +54,7 @@ const BookRide = () => {
           }
         );
         if (response.status === 200) {
-          const availableRides = response.data.filter(ride => ride.availableSeats > 0);
+          const availableRides = response.data.filter(ride => ride.availableSeats > 0 && ride.status !== "ONGOING" && ride.status !== "COMPLETED");
           toast.success("All Rides Fetched Successfully");
           console.log(availableRides);
           setPublishedRide(availableRides);
@@ -62,7 +62,7 @@ const BookRide = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.message);
+      toast.error("Something Went Wrong");
     }
   };
 
@@ -74,12 +74,13 @@ const BookRide = () => {
     }
     const publisherRideId = rideToBook.publisherRideId;
     try {
-      const response = await axios.post(`http://localhost:8089/user/passengers/${auth.id}/book`, {
+      const response = await axios.post(`https://api.sharemytrip.xyz/user/passengers/${auth.id}/book`, {
         passengerId: auth.id,
         publisherRideId: publisherRideId,
         noOfPassengers: rideSeats
       });
       if (response.status === 200) {
+        await axios.post(`https://api.sharemytrip.xyz/email/send-passenger-booked-confirmation?passengerEmail=${encodeURIComponent(auth.email)}`)
         toast.success("Ride Booked Successfully");
         setShowModal(false);
         setShowConfirmationModal(true);
@@ -274,7 +275,7 @@ const BookRide = () => {
           <div id="popup-modal" tabIndex="-1" className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black bg-opacity-50">
             <div className="relative p-4 w-full max-w-md max-h-full">
               <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-                <button type="button" className="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" onClick={closeModal}>
+                <button type="button" className="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center d" onClick={closeModal}>
                   <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                   </svg>
@@ -285,10 +286,10 @@ const BookRide = () => {
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                   </svg>
                   <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Are you sure you want to book this ride?</h3>
-                  <button type="button" className="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center" onClick={handleBookRide}>
+                  <button type="button" className="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300  font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center" onClick={handleBookRide}>
                     Yes, I'm sure
                   </button>
-                  <button type="button" className="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700" onClick={closeModal}>
+                  <button type="button" className="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100" onClick={closeModal}>
                     No, cancel
                   </button>
                 </div>
@@ -300,19 +301,19 @@ const BookRide = () => {
         {showConfirmationModal && (
           <div id="confirmation-modal" tabIndex="-1" className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black bg-opacity-50">
             <div className="relative p-4 w-full max-w-md max-h-full">
-              <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-                <button type="button" className="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" onClick={() => setShowConfirmationModal(false)}>
+              <div className="relative bg-white rounded-lg shadow">
+                <button type="button" className="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center" onClick={() => setShowConfirmationModal(false)}>
                   <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                   </svg>
                   <span className="sr-only">Close modal</span>
                 </button>
                 <div className="p-4 md:p-5 text-center">
-                  <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Ride booked successfully!</h3>
-                  <button type="button" className="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center" onClick={() => navigate("/passanger/myRides")}>
+                  <h3 className="mb-5 text-lg font-normal text-gray-500">Ride booked successfully!</h3>
+                  <button type="button" className="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center" onClick={() => navigate("/passanger/myRides")}>
                     My Rides
                   </button>
-                  <button type="button" className="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700" onClick={() => navigate("/")}>
+                  <button type="button" className="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100" onClick={() => navigate("/")}>
                     Home
                   </button>
                 </div>

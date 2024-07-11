@@ -16,18 +16,31 @@ const CreateRide = () => {
   const [date_of_journey, setDateOfJourney] = useState("");
   const [time_of_journey, setTimeOfJourney] = useState("");
   const [fare_per_seat, setFarePerSeats] = useState("");
+  const [initialFare, setInitialFare] = useState(""); // New state to hold the initially fetched fare
   const [description, setDescription] = useState("");
   const [errors, setErrors] = useState({});
   const [showModal, setShowModal] = useState(false);
+  const [minTime, setMinTime] = useState("");
 
   const validate = () => {
     let tempErrors = {};
     if (!from_location) tempErrors.from_location = "From Location is required";
     if (!to_location) tempErrors.to_location = "To Location is required";
-    if (!available_seats) tempErrors.available_seats = "Available Seats is required";
-    if (!date_of_journey) tempErrors.date_of_journey = "Date of Journey is required";
-    if (!time_of_journey) tempErrors.time_of_journey = "Time of Journey is required";
+    if (!available_seats)
+      tempErrors.available_seats = "Available Seats is required";
+    if (!date_of_journey)
+      tempErrors.date_of_journey = "Date of Journey is required";
+    if (!time_of_journey)
+      tempErrors.time_of_journey = "Time of Journey is required";
     if (!fare_per_seat) tempErrors.fare_per_seats = "Fare Per Seat is required";
+    if (
+      parseFloat(fare_per_seat) < parseFloat(initialFare) - 200 ||
+      parseFloat(fare_per_seat) > parseFloat(initialFare) + 200
+    ) {
+      tempErrors.fare_per_seats = `Fare Per Seat must be between ${
+        parseFloat(initialFare) - 200
+      } and ${parseFloat(initialFare) + 200}`;
+    }
 
     setErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
@@ -37,28 +50,49 @@ const CreateRide = () => {
     const fetchDistanceAndFare = async () => {
       if (from_location && to_location) {
         try {
-          const distanceResponse = await axios.post("http://localhost:8094/fare/distance", {
-            fromLocation: from_location,
-            toLocation: to_location,
-          });
-          if (distanceResponse.status === 200) {
-            setDistance(distanceResponse.data.distance);
-            const fareResponse = await axios.post("http://localhost:8094/fare/calculate", {
+          const distanceResponse = await axios.post(
+            "https://api.sharemytrip.xyz/fare/distance",
+            {
               fromLocation: from_location,
               toLocation: to_location,
-            });
+            }
+          );
+          if (distanceResponse.status === 200) {
+            setDistance(distanceResponse.data.distance);
+            const fareResponse = await axios.post(
+              "https://api.sharemytrip.xyz/fare/calculate",
+              {
+                fromLocation: from_location,
+                toLocation: to_location,
+              }
+            );
             if (fareResponse.status === 200) {
               setFarePerSeats(fareResponse.data.totalFare);
+              setInitialFare(fareResponse.data.totalFare); // Set the initial fare
+              const JourneyResponse = await axios.post(
+                "https://api.sharemytrip.xyz/fare/calculateJourneyTime",
+                {
+                  fromLocation: from_location,
+                  toLocation: to_location,
+                }
+              );
+              if (JourneyResponse.status == 200) {
+                setJourneyHour(JourneyResponse.data);
+              }
             }
           }
         } catch (error) {
           console.error("Error fetching distance and fare", error);
-          toast.error("Failed to fetch distance and fare");
         }
       }
     };
 
     fetchDistanceAndFare();
+    // Set minimum time to the current time
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, "0");
+    const minutes = now.getMinutes().toString().padStart(2, "0");
+    setMinTime(`${hours}:${minutes}`);
   }, [from_location, to_location]);
 
   const handleSubmit = async (e) => {
@@ -70,23 +104,34 @@ const CreateRide = () => {
 
   const handleConfirm = async () => {
     try {
-      const formattedTime = new Date(`1970-01-01T${time_of_journey}:00`).toTimeString().split(' ')[0];
-      const response = await axios.post(`http://localhost:8089/user/publishers/${auth.id}/rides`, {
-        fromLocation: from_location,
-        toLocation: to_location,
-        distance: distance,
-        journeyHours: journey_hours,
-        availableSeats: available_seats,
-        dateOfJourney: date_of_journey,
-        timeOfJourney: formattedTime,
-        farePerSeat: fare_per_seat,
-        aboutRide: description,
-      });
-      toast.success("Ride published successfully!", {
-        duration: 3000
-      });
-      navigate("/publisher/dashboard");
-      console.log(response);
+      const formattedTime = new Date(`1970-01-01T${time_of_journey}:00`)
+        .toTimeString()
+        .split(" ")[0];
+      const response = await axios.post(
+        `https://api.sharemytrip.xyz/user/publishers/${auth.id}/rides`,
+        {
+          fromLocation: from_location,
+          toLocation: to_location,
+          distance: distance,
+          journeyHours: journey_hours,
+          availableSeats: available_seats,
+          dateOfJourney: date_of_journey,
+          timeOfJourney: formattedTime,
+          farePerSeat: fare_per_seat,
+          aboutRide: description,
+        }
+      );
+      if (response.status === 200) {
+        await axios.post(
+          `https://api.sharemytrip.xyz/email/send-publisher-confirmation?publisherEmail=${encodeURIComponent(
+            auth.email
+          )}`
+        );
+        toast.success("Ride published successfully!", {
+          duration: 3000,
+        });
+        navigate("/publisher/dashboard");
+      }
     } catch (error) {
       console.error("There was an error publishing the ride!", error);
       toast.error("Failed to publish the ride.");
@@ -109,7 +154,10 @@ const CreateRide = () => {
           <h2 className="text-2xl text-red-600 mb-6">Publish a New Ride</h2>
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label htmlFor="from_location" className="block text-gray-700 mb-2">
+              <label
+                htmlFor="from_location"
+                className="block text-gray-700 mb-2"
+              >
                 From Location
               </label>
               <input
@@ -120,7 +168,9 @@ const CreateRide = () => {
                 value={from_location}
                 onChange={(e) => setFromLocation(e.target.value)}
               />
-              {errors.from_location && <p className="text-red-500 text-sm">{errors.from_location}</p>}
+              {errors.from_location && (
+                <p className="text-red-500 text-sm">{errors.from_location}</p>
+              )}
             </div>
             <div className="mb-4">
               <label htmlFor="to_location" className="block text-gray-700 mb-2">
@@ -134,11 +184,13 @@ const CreateRide = () => {
                 value={to_location}
                 onChange={(e) => setToLocation(e.target.value)}
               />
-              {errors.to_location && <p className="text-red-500 text-sm">{errors.to_location}</p>}
+              {errors.to_location && (
+                <p className="text-red-500 text-sm">{errors.to_location}</p>
+              )}
             </div>
             <div className="mb-4">
               <label htmlFor="distance" className="block text-gray-700 mb-2">
-                Distance
+                Distance(in KM)
               </label>
               <input
                 type="number"
@@ -151,21 +203,28 @@ const CreateRide = () => {
               />
             </div>
             <div className="mb-4">
-              <label htmlFor="journey_hours" className="block text-gray-700 mb-2">
+              <label
+                htmlFor="journey_hours"
+                className="block text-gray-700 mb-2"
+              >
                 Journey Hours
               </label>
               <input
-                type="number"
+                type="text"
                 step="0.1"
                 id="journey_hours"
                 name="journey_hours"
                 className="w-full p-2 border border-gray-300 rounded-md"
+                readOnly
                 value={journey_hours}
                 onChange={(e) => setJourneyHour(e.target.value)}
               />
             </div>
             <div className="mb-4">
-              <label htmlFor="available_seats" className="block text-gray-700 mb-2">
+              <label
+                htmlFor="available_seats"
+                className="block text-gray-700 mb-2"
+              >
                 Available Seats
               </label>
               <input
@@ -176,10 +235,15 @@ const CreateRide = () => {
                 value={available_seats}
                 onChange={(e) => setAvailableSeats(e.target.value)}
               />
-              {errors.available_seats && <p className="text-red-500 text-sm">{errors.available_seats}</p>}
+              {errors.available_seats && (
+                <p className="text-red-500 text-sm">{errors.available_seats}</p>
+              )}
             </div>
             <div className="mb-4">
-              <label htmlFor="date_of_journey" className="block text-gray-700 mb-2">
+              <label
+                htmlFor="date_of_journey"
+                className="block text-gray-700 mb-2"
+              >
                 Date of Journey
               </label>
               <input
@@ -191,10 +255,15 @@ const CreateRide = () => {
                 value={date_of_journey}
                 onChange={(e) => setDateOfJourney(e.target.value)}
               />
-              {errors.date_of_journey && <p className="text-red-500 text-sm">{errors.date_of_journey}</p>}
+              {errors.date_of_journey && (
+                <p className="text-red-500 text-sm">{errors.date_of_journey}</p>
+              )}
             </div>
             <div className="mb-4">
-              <label htmlFor="time_of_journey" className="block text-gray-700 mb-2">
+              <label
+                htmlFor="time_of_journey"
+                className="block text-gray-700 mb-2"
+              >
                 Time of Journey
               </label>
               <input
@@ -203,13 +272,19 @@ const CreateRide = () => {
                 name="time_of_journey"
                 className="w-full p-2 border border-gray-300 rounded-md"
                 value={time_of_journey}
+                min={minTime}
                 onChange={(e) => setTimeOfJourney(e.target.value)}
               />
-              {errors.time_of_journey && <p className="text-red-500 text-sm">{errors.time_of_journey}</p>}
+              {errors.time_of_journey && (
+                <p className="text-red-500 text-sm">{errors.time_of_journey}</p>
+              )}
             </div>
             <div className="mb-4">
-              <label htmlFor="fare_per_seats" className="block text-gray-700 mb-2">
-                Fare Per Seat
+              <label
+                htmlFor="fare_per_seats"
+                className="block text-gray-700 mb-2"
+              >
+                Fare Per Seat (in Rupees)
               </label>
               <input
                 type="number"
@@ -218,8 +293,13 @@ const CreateRide = () => {
                 name="fare_per_seats"
                 className="w-full p-2 border border-gray-300 rounded-md"
                 value={fare_per_seat}
-                readOnly
+                min={parseFloat(initialFare) - 200} // Use initialFare for validation
+                max={parseFloat(initialFare) + 200} // Use initialFare for validation
+                onChange={(e) => setFarePerSeats(e.target.value)}
               />
+              {errors.fare_per_seats && (
+                <p className="text-red-500 text-sm">{errors.fare_per_seats}</p>
+              )}
             </div>
             <div className="mb-6">
               <label htmlFor="about_ride" className="block text-gray-700 mb-2">
@@ -245,24 +325,66 @@ const CreateRide = () => {
       </div>
 
       {showModal && (
-        <div id="popup-modal" tabIndex="-1" className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black bg-opacity-50">
+        <div
+          id="popup-modal"
+          tabIndex="-1"
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black bg-opacity-50"
+        >
           <div className="relative p-4 w-full max-w-md max-h-full">
-            <div className="relative bg-white rounded-lg shadow dark:bg-gray-700">
-              <button type="button" className="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" onClick={closeModal}>
-                <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+            <div className="relative bg-white rounded-lg shadow">
+              <button
+                type="button"
+                className="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
+                onClick={closeModal}
+              >
+                <svg
+                  className="w-3 h-3"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 14 14"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                  />
                 </svg>
                 <span className="sr-only">Close modal</span>
               </button>
               <div className="p-4 md:p-5 text-center">
-                <svg className="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                <svg
+                  className="mx-auto mb-4 text-gray-400 w-12 h-12"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                  />
                 </svg>
-                <h3 className="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Are you sure you want to publish this ride?</h3>
-                <button type="button" className="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center" onClick={handleConfirm}>
+                <h3 className="mb-5 text-lg font-normal text-gray-500">
+                  Are you sure you want to publish this ride?
+                </h3>
+                <button
+                  type="button"
+                  className="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300  font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center"
+                  onClick={handleConfirm}
+                >
                   Yes, I'm sure
                 </button>
-                <button type="button" className="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700" onClick={closeModal}>
+                <button
+                  type="button"
+                  className="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100"
+                  onClick={closeModal}
+                >
                   No, cancel
                 </button>
               </div>

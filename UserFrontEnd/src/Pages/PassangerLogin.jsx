@@ -5,12 +5,14 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../context/auth";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Login = () => {
   const navigate = useNavigate();
   const [auth, setAuth] = useAuth();
   const [userEmail, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
   const [errorMessageEmail, setErrorMessageEmail] = useState("");
   const [errorMessagePassword, setErrorMessagePassword] = useState("");
 
@@ -26,9 +28,13 @@ const Login = () => {
       setErrorMessagePassword("Password Field Is Mandatory");
       return;
     }
+    if(password.length < 6){ 
+        setErrorMessagePassword("Password Must Be 8 digit");
+        return;
+      }
 
     try {
-      const response = await axios.post(`http://3.6.151.30:8089/user/passengers/login`, {
+      const response = await axios.post(`https://api.sharemytrip.xyz/user/passengers/login`, {
         email: userEmail,
         password
       });
@@ -56,7 +62,7 @@ const Login = () => {
         toast.error(response.data.message);
       }
     } catch (error) {
-      toast.error(error.message || "An error occurred");
+      toast.error("Invalid Credentials");
       console.log(error);
     }
   };
@@ -94,7 +100,7 @@ const Login = () => {
                   className="w-full p-2 border border-[#ddd] rounded-md"
                 />
               </div>
-              <div className="mb-5 text-left">
+              <div className="mb-5 text-left relative">
                 <label htmlFor="password" className="block mb-2 text-[#333]">
                   Password
                 </label>
@@ -103,15 +109,23 @@ const Login = () => {
                     {errorMessagePassword}
                   </p>
                 )}
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full p-2 border border-[#ddd] rounded-md"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="w-full p-2 border border-[#ddd] rounded-md pr-10"
+                  />
+                  <span
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-[#333]"
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </span>
+                </div>
               </div>
               <button
                 type="submit"
@@ -127,7 +141,7 @@ const Login = () => {
             </p>
             <p className="mt-5">
               Don't have an account?{" "}
-              <NavLink to="/register/passenger" className="text-[#ff6f61]">
+              <NavLink to="/register/passanger" className="text-[#ff6f61]">
                 Register here
               </NavLink>
             </p>

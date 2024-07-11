@@ -6,26 +6,24 @@ import Spinner from '../Components/UI/Spinner';
 const PassangerRoute = () => {
   const [auth, setAuth] = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = () => {
-      if (auth.token == null || auth.userType.toUpperCase() !== "PASSENGER") {
-        setLoading(true);
-        setTimeout(() => {
-          navigate("/log-in/passanger");
-        }, 5000);
-      } else {
-        setLoading(false);
+      if (auth.token == null && auth.userType.toUpperCase() !== "PASSENGER") {
+        navigate("/log-in/passanger");
+        // setLoading(true);
+        // setTimeout(() => {
+        // }, 5000);
       }
     };
 
     checkAuth();
-  }, [auth, navigate]);
+  }, [auth]);
 
-  if (loading) {
-    return <Spinner countdown={5} />;
-  }
+  // if (loading) {
+  //   return <Spinner countdown={5} />;
+  // }
 
   return <Outlet />;
 };

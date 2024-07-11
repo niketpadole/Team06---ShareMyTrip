@@ -1,7 +1,32 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Layout from "../../Components/Layouts/Layout";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { useAuth } from "../../context/auth";
 
 const ViewAllTransaction = () => {
+  const [auth,setAuth] = useAuth();
+  const [transaction, setTransaction] = useState([]);
+  const fetchTransaction = async() => {
+    try {
+      const response = await axios.get(`https://api.sharemytrip.xyz/user/passengers/${auth.id}/transactions`);
+      if(response.status == 200)
+        {
+          setTransaction(response.data);
+          toast.success("All Transaction Fetched SucessFully");
+        }
+        else{
+          toast(response.data.message);
+        }
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong");
+    }
+  }
+
+  useEffect(() => {
+    fetchTransaction();
+  },[])
   return (
     <Layout>
       <main className="py-10 bg-[#fff4f1]">
@@ -20,12 +45,14 @@ const ViewAllTransaction = () => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className="border px-4 py-2">1</td>
-                <td className="border px-4 py-2">101</td>
-                <td className="border px-4 py-2">$50</td>
-                <td className="border px-4 py-2">2024-06-10 10:00:00</td>
-              </tr>
+            {transaction.map((transaction, index) => (
+                <tr key={index}>
+                  <td className="border px-4 py-2">{transaction.orderId}</td>
+                  <td className="border px-4 py-2">{transaction.passengerRideId}</td>
+                  <td className="border px-4 py-2">{transaction.totalFare}</td>
+                  <td className="border px-4 py-2">{new Date(transaction.timestamp).toLocaleString()}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </section>

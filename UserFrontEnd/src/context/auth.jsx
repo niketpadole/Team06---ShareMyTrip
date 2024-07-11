@@ -12,6 +12,7 @@ const AuthProvider = ({ children }) => {
     mobile: "",
     dateOfBirth: "",
     userType: "",
+    totalEarnings:"",
     token: "",
   });
 
@@ -29,6 +30,7 @@ const AuthProvider = ({ children }) => {
         mobile: parsedData.mobile,
         dateOfBirth: parsedData.dateOfBirth,
         userType: parsedData.userType,
+        totalEarnings:parsedData.totalEarnings,
         token: parsedData.token,
       });
       axios.defaults.headers.common["Authorization"] = parsedData.token;

@@ -1,12 +1,14 @@
 import React, { useState } from "react";
-import { NavLink,  useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
 import { useAuth } from "../../context/auth";
 import { FaUserCircle } from "react-icons/fa";
+import { useRides } from "../../context/RideDetails";
 
 const Header = () => {
   const navigate = useNavigate();
   const [auth, setAuth] = useAuth();
+  const [ridesDetail, setRideDetail]= useRides();
   const [dropDown, setDropDown] = useState(false);
   const [registerDropDown, setRegisterDropDown] = useState(false);
   const [loginDropDown, setLoginDropDown] = useState(false);
@@ -35,9 +37,11 @@ const Header = () => {
       mobile: "",
       dateOfBirth: "",
       userType: "",
-      token: ""
+      token: "",
     });
     localStorage.removeItem("auth");
+    setRideDetail({});
+    localStorage.removeItem("rides");
     navigate("/");
   };
 
@@ -133,12 +137,12 @@ const Header = () => {
                           >
                             My Rides
                           </NavLink>
-                          <NavLink
+                          {/* <NavLink
                             to="/publisher/transactions"
                             className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
                           >
                             View Transactions
-                          </NavLink>
+                          </NavLink> */}
                           <NavLink
                             to="/publisher/profile"
                             className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
@@ -213,7 +217,11 @@ const Header = () => {
                 <li className="relative">
                   <button
                     onClick={toggleRegisterDropDown}
-                    className={`${auth.token ? "hidden" : "block px-4 py-2 text-white text-lg hover:text-[#6f61ff] active:text-[#6f61ff]"}`}
+                    className={`${
+                      auth.token
+                        ? "hidden"
+                        : "block px-4 py-2 text-white text-lg hover:text-[#6f61ff] active:text-[#6f61ff]"
+                    }`}
                   >
                     Register
                   </button>
@@ -326,68 +334,68 @@ const Header = () => {
                       profileDropDown ? "block" : "hidden"
                     }`}
                   >
-                      {auth.userType === "PUBLISHER" ? (
-                        <>
-                          <NavLink
-                            to="/publisher/dashboard"
-                            className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                          >
-                            Dashboard
-                          </NavLink>
-                          <NavLink
-                            to="/publisher/myRides"
-                            className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                          >
-                            My Rides
-                          </NavLink>
-                          <NavLink
-                            to="/publisher/transactions"
-                            className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                          >
-                            View Transactions
-                          </NavLink>
-                          <NavLink
-                            to="/publisher/profile"
-                            className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                          >
-                            Profile
-                          </NavLink>
-                        </>
-                      ) : (
-                        <>
-                          <NavLink
-                            to="/passenger/dashboard"
-                            className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                          >
-                            Dashboard
-                          </NavLink>
-                          <NavLink
-                            to="/passanger/myRides"
-                            className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                          >
-                            My Rides
-                          </NavLink>
-                          <NavLink
-                            to="/passanger/transactions"
-                            className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                          >
-                            View Transactions
-                          </NavLink>
-                          <NavLink
-                            to="/passanger/profile"
-                            className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
-                          >
-                            Profile
-                          </NavLink>
-                        </>
-                      )}
-                      <button
-                        onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200"
-                      >
-                        Logout
-                      </button>
-                    </div>
+                    {auth.userType === "PUBLISHER" ? (
+                      <>
+                        <NavLink
+                          to="/publisher/dashboard"
+                          className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                        >
+                          Dashboard
+                        </NavLink>
+                        <NavLink
+                          to="/publisher/myRides"
+                          className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                        >
+                          My Rides
+                        </NavLink>
+                        {/* <NavLink
+                          to="/publisher/transactions"
+                          className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                        >
+                          View Transactions
+                        </NavLink> */}
+                        <NavLink
+                          to="/publisher/profile"
+                          className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                        >
+                          Profile
+                        </NavLink>
+                      </>
+                    ) : (
+                      <>
+                        <NavLink
+                          to="/passenger/dashboard"
+                          className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                        >
+                          Dashboard
+                        </NavLink>
+                        <NavLink
+                          to="/passanger/myRides"
+                          className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                        >
+                          My Rides
+                        </NavLink>
+                        <NavLink
+                          to="/passanger/transactions"
+                          className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                        >
+                          View Transactions
+                        </NavLink>
+                        <NavLink
+                          to="/passanger/profile"
+                          className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
+                        >
+                          Profile
+                        </NavLink>
+                      </>
+                    )}
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-200"
+                    >
+                      Logout
+                    </button>
+                  </div>
                 </li>
               ) : (
                 <li className="relative">
@@ -420,7 +428,11 @@ const Header = () => {
               <li className="relative">
                 <button
                   onClick={toggleRegisterDropDown}
-                  className={`${auth.token ? "hidden" : "block px-4 py-2 text-white text-lg hover:text-[#6f61ff] active:text-[#6f61ff]"}`}
+                  className={`${
+                    auth.token
+                      ? "hidden"
+                      : "block px-4 py-2 text-white text-lg hover:text-[#6f61ff] active:text-[#6f61ff]"
+                  }`}
                 >
                   Register
                 </button>
@@ -430,7 +442,7 @@ const Header = () => {
                   }`}
                 >
                   <NavLink
-                    to="/register/passenger"
+                    to="/register/passanger"
                     className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
                   >
                     Passenger

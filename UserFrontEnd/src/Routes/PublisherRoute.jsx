@@ -6,26 +6,24 @@ import Spinner from '../Components/UI/Spinner';
 const PublisherRoute = () => {
   const [auth, setAuth] = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = () => {
-      if (auth.token == null || auth.userType.toUpperCase() !== "PUBLISHER") {
-        setLoading(true);
-        setTimeout(() => {
-          navigate("/log-in/publisher");
-        }, 5000);
-      } else {
-        setLoading(false);
+      if (auth.token == null && auth.userType.toUpperCase() !== "PUBLISHER") {
+        navigate("/log-in/publisher");
+        // setLoading(true);
+        // setTimeout(() => {
+        // }, 5000);
       }
     };
 
     checkAuth();
-  }, [auth, navigate]);
+  }, [auth]);
 
-  if (loading) {
-    return <Spinner countdown={5} />;
-  }
+  // if (loading) {
+  //   return <Spinner countdown={5} />;
+  // }
 
   return <Outlet />;
 };

@@ -9,12 +9,12 @@ const Footer = () => {
         <div className="max-w-6xl mx-auto px-5 flex flex-col items-center">
           <ul className="list-none p-0 flex flex-wrap justify-center mb-5">
             <li className="m-2.5">
-              <HashLink
+              <NavLink
                 className="text-white no-underline font-bold transition-colors duration-300 hover:text-red-100"
-                to="#about"
+                to="/"
               >
                 About
-              </HashLink>
+              </NavLink>
             </li>
             <li className="m-2.5">
               <NavLink

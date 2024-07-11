@@ -3,6 +3,7 @@ import Layout from "../Components/Layouts/Layout";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const PublisherRegister = () => {
   const navigate = useNavigate();
@@ -12,9 +13,10 @@ const PublisherRegister = () => {
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [dateOfBirth, setDateOfBirth] = useState("");
-  const [drivingLicence, setDrivingLicence] = useState(null);
-  const [addhar, setAddhar] = useState(null);
+  const [drivingLicence, setDrivingLicence] = useState("");
+  const [aadhar, setAadhar] = useState("");
   const [miniBio, setMiniBio] = useState("");
   const [vehicleModelName, setModelName] = useState("");
   const [vehicleNo, setVeichleNumber] = useState("");
@@ -24,39 +26,64 @@ const PublisherRegister = () => {
   const [errorMessageEmail, setErrorMessageEmail] = useState("");
   const [errorMessagePassword, setErrorMessagePassword] = useState("");
   const [errorMessageDOB, setErrorMessageDOB] = useState("");
-  const [errorMessageDrivingLicence, setErrorMessageDrivingLicence] =
-    useState("");
-  const [errorMessageAddhar, setErrorMessageAddhar] = useState("");
+  const [errorMessageDrivingLicence, setErrorMessageDrivingLicence] = useState("");
+  const [errorMessageAadhar, setErrorMessageAadhar] = useState("");
   const [errorMessageModelName, setErrorMessageModelName] = useState("");
-  const [errorMessageVeichleNumber, setErrorMessageVeichleNumber] =
-    useState("");
+  const [errorMessageVeichleNumber, setErrorMessageVehicleNumber] = useState("");
 
   const validate = () => {
     let isValid = true;
 
     if (!firstName) {
-      setErrorMessageFirstName("First Name Is Required");
+      setErrorMessageFirstName("First Name is required");
       isValid = false;
+    } else if (!/^[a-zA-Z]+$/.test(firstName)) {
+      setErrorMessageFirstName('First Name must be a string');
+      isValid = false;
+    } else {
+      setErrorMessageFirstName("");
     }
+
     if (!lastName) {
-      setErrorMessageLastName("Last Name Is Required");
+      setErrorMessageLastName("Last Name is required");
       isValid = false;
+    } else if (!/^[a-zA-Z]+$/.test(lastName)) {
+      setErrorMessageLastName('Last Name must be a string');
+      isValid = false;
+    } else {
+      setErrorMessageLastName("");
     }
+
     if (!mobile) {
       setErrorMessageMobile("Mobile Number is Required");
       isValid = false;
-    }else if (!/^[789]\d{9}$/.test(mobile)) {
-      setErrorMessageMobile("Mobile Number must be 10 digits Should start with 7|8|9");
+    } else if (!/^[789]\d{9}$/.test(mobile)) {
+      setErrorMessageMobile("Mobile Number must be 10 digits and start with 7, 8, or 9");
       isValid = false;
+    } else {
+      setErrorMessageMobile("");
     }
+
     if (!email) {
       setErrorMessageEmail("Email is Mandatory");
       isValid = false;
-    }
-    if (!password) {
-      setErrorMessagePassword("Password Fields Is Mandatory");
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      setErrorMessageEmail("Email address is invalid");
       isValid = false;
+    } else {
+      setErrorMessageEmail("");
     }
+
+    if (!password) {
+      setErrorMessagePassword("Password is Mandatory");
+      isValid = false;
+    } else if (password.length < 6) {
+      setErrorMessagePassword("Password must be at least 6 characters");
+      isValid = false;
+    } else {
+      setErrorMessagePassword("");
+    }
+
     if (!dateOfBirth) {
       setErrorMessageDOB("DOB is Required");
       isValid = false;
@@ -64,6 +91,9 @@ const PublisherRegister = () => {
       const dob = new Date(dateOfBirth);
       const today = new Date();
       const minDOB = new Date("1947-01-01");
+      const ageDiff = today.getFullYear() - dob.getFullYear();
+      const ageMonth = today.getMonth() - dob.getMonth();
+      const ageDay = today.getDate() - dob.getDate();
 
       if (dob > today) {
         setErrorMessageDOB("Date of Birth cannot be a future date.");
@@ -71,18 +101,50 @@ const PublisherRegister = () => {
       } else if (dob < minDOB) {
         setErrorMessageDOB("Date of Birth cannot be before 1947.");
         isValid = false;
+      } else if (ageDiff < 18 || (ageDiff === 18 && (ageMonth < 0 || (ageMonth === 0 && ageDay < 0)))) {
+        setErrorMessageDOB("You must be at least 18 years old.");
+        isValid = false;
       } else {
         setErrorMessageDOB("");
       }
     }
-    // if (!drivingLicence) {
-    //   setErrorMessageDrivingLicence("Document is Required");
-    //   isValid = false;
-    // }
-    // if (!addhar) {
-    //   setErrorMessageAddhar("Document is Required");
-    //   isValid = false;
-    // }
+
+    if (!drivingLicence) {
+      setErrorMessageDrivingLicence("Driving Licence is Required");
+      isValid = false;
+    } else if (drivingLicence.length !== 15) {
+      setErrorMessageDrivingLicence("Driving Licence must be 15 characters");
+      isValid = false;
+    } else {
+      setErrorMessageDrivingLicence("");
+    }
+
+    if (!aadhar) {
+      setErrorMessageAadhar("Aadhar Card number is required");
+      isValid = false;
+    } else if (!/^\d{12}$/.test(aadhar)) {
+      setErrorMessageAadhar("Aadhar Card number must be 12 digits");
+      isValid = false;
+    } else {
+      setErrorMessageAadhar("");
+    }
+
+    if (!vehicleModelName) {
+      setErrorMessageModelName("Model Name is required");
+      isValid = false;
+    } else {
+      setErrorMessageModelName("");
+    }
+
+    if (!vehicleNo) {
+      setErrorMessageVehicleNumber("Vehicle Number is required");
+      isValid = false;
+    } else if (!/^[A-Z]{2}\d{2}[A-Z]{2}\d{4}$/.test(vehicleNo)) {
+      setErrorMessageVehicleNumber("Vehicle Number must be in the format MH56BY2345");
+      isValid = false;
+    } else {
+      setErrorMessageVehicleNumber("");
+    }
 
     return isValid;
   };
@@ -92,40 +154,37 @@ const PublisherRegister = () => {
       e.preventDefault();
       const validation = validate();
       if (validation) {
-        const response = await axios.post("http://localhost:8089/user/publishers/register", {
+        const response = await axios.post("https://api.sharemytrip.xyz/user/publishers/register", {
           firstName,
           lastName,
           mobile,
           email,
           password,
           dateOfBirth,
-          drivingLicence,
-          addhar,
+          "drivingLicense": drivingLicence,
+          "aadharCard": aadhar,
           miniBio,
           vehicleModelName,
           vehicleNo
         });
-        if(response.status == 200)
-          {
-            toast.success("Publisher Registration SucessFull",{
-              duration:5000
-            });
-            navigate("/log-in/publisher")
-          }
-          else{
-            toast.error("Registration Failed",{
-              duration:3000
-            })
-          }
-      }
-      else{
+        if (response.status === 200) {
+          toast.success("Publisher Registration Successful", {
+            duration: 5000
+          });
+          navigate("/log-in/publisher");
+        } else {
+          toast.error("Registration Failed", {
+            duration: 3000
+          });
+        }
+      } else {
         toast.error("Validation Failed");
       }
     } catch (error) {
       console.log(error);
-      toast.error("Internal Error",{
-        duration:3000
-      })
+      toast.error("Internal Error", {
+        duration: 3000
+      });
     }
   };
 
@@ -146,16 +205,16 @@ const PublisherRegister = () => {
             <h1 className="mb-5 text-[#ff6f61] text-2xl md:text-3xl">
               Publisher Register
             </h1>
-            <form action="/login" method="post" className="text-left">
+            <form onSubmit={register} className="text-left">
               <div className="mb-5">
                 <label htmlFor="firstName" className="block mb-2 text-[#333]">
                   First Name
                 </label>
                 <input
                   type="text"
-                  id="firstname"
-                  name="firstname"
-                  placeholder="Jhon"
+                  id="firstName"
+                  name="firstName"
+                  placeholder="John"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   required
@@ -173,8 +232,8 @@ const PublisherRegister = () => {
                 </label>
                 <input
                   type="text"
-                  id="lastname"
-                  name="lastname"
+                  id="lastName"
+                  name="lastName"
                   placeholder="Rogers"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
@@ -221,20 +280,28 @@ const PublisherRegister = () => {
                   <p className="text-red-500 text-sm">{errorMessageEmail}</p>
                 )}
               </div>
-              <div className="mb-5">
+              <div className="mb-5 text-left relative">
                 <label htmlFor="password" className="block mb-2 text-[#333]">
                   Password
                 </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full p-2 border border-[#ddd] rounded-md"
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="w-full p-2 border border-[#ddd] rounded-md pr-10"
+                  />
+                  <span
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-[#333]"
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </span>
+                </div>
                 {errorMessagePassword && (
                   <p className="text-red-500 text-sm">{errorMessagePassword}</p>
                 )}
@@ -266,13 +333,14 @@ const PublisherRegister = () => {
                   Driving License
                 </label>
                 <input
-                  type="file"
+                  type="text"
                   id="drivingLicence"
                   name="drivingLicence"
-                  accept="image/*"
+                  placeholder="Enter your 15-digit Driving License number"
+                  value={drivingLicence}
+                  onChange={(e) => setDrivingLicence(e.target.value)}
                   required
                   className="w-full p-2 border border-[#ddd] rounded-md"
-                  onChange={(e) => setDrivingLicence(e.target.files[0])}
                 />
                 {errorMessageDrivingLicence && (
                   <p className="text-red-500 text-sm">
@@ -281,20 +349,21 @@ const PublisherRegister = () => {
                 )}
               </div>
               <div className="mb-5">
-                <label htmlFor="addhar" className="block mb-2 text-[#333]">
-                  Aadhar
+                <label htmlFor="aadhaar" className="block mb-2 text-[#333]">
+                  Aadhar Card
                 </label>
                 <input
-                  type="file"
-                  id="addhar"
-                  name="addhar"
-                  accept="image/*"
+                  type="text"
+                  id="aadhaar"
+                  name="aadhaar"
+                  placeholder="Enter your 12-digit Aadhaar number"
+                  value={aadhar}
+                  onChange={(e) => setAadhar(e.target.value)}
                   required
                   className="w-full p-2 border border-[#ddd] rounded-md"
-                  onChange={(e) => setAddhar(e.target.files[0])}
                 />
-                {errorMessageAddhar && (
-                  <p className="text-red-500 text-sm">{errorMessageAddhar}</p>
+                {errorMessageAadhar && (
+                  <p className="text-red-500 text-sm">{errorMessageAadhar}</p>
                 )}
               </div>
               <div className="mb-5">
@@ -318,7 +387,7 @@ const PublisherRegister = () => {
                   type="text"
                   id="modelName"
                   name="modelName"
-                  placeholder="Enter your vehicle model name"
+                  placeholder="Enter your vehicle model name Ex:Suzuki Dzire"
                   value={vehicleModelName}
                   required
                   onChange={(e) => setModelName(e.target.value)}
@@ -341,7 +410,7 @@ const PublisherRegister = () => {
                   type="text"
                   id="veichleNumber"
                   name="veichleNumber"
-                  placeholder="Enter your vehicle number"
+                  placeholder="Enter your vehicle number Ex:AP04GT5678"
                   value={vehicleNo}
                   required
                   onChange={(e) => setVeichleNumber(e.target.value)}

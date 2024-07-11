@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../context/auth";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const PublisherLogin = () => {
   const navigate = useNavigate();
@@ -12,32 +13,40 @@ const PublisherLogin = () => {
   const [auth, setAuth] = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
   const [errorMessageEmail, setErrorMessageEmail] = useState("");
   const [errorMessagePassword, setErrorMessagePassword] = useState("");
+
   const logIn = async (e) => {
     try {
       e.preventDefault();
+      setErrorMessageEmail("");
+      setErrorMessagePassword("");
       if (!email) {
         setErrorMessageEmail("Email is Mandatory");
         return;
       }
       if (!password) {
-        setErrorMessagePassword("Password Fields Is Mandatory");
+        setErrorMessagePassword("Password Field Is Mandatory");
+        return;
+      }
+      if(password.length < 6){ 
+        setErrorMessagePassword("Password Must Be 8 digit");
         return;
       }
       const response = await axios.post(
-        "http://localhost:8089/user/publishers/login",
+        "https://api.sharemytrip.xyz/user/publishers/login",
         {
           email,
           password,
         }
       );
-      if (response.status == 200) {
-        toast.success("Publisher Login SucessFull", {
+      if (response.status === 200) {
+        toast.success("Publisher Login Successful", {
           duration: 6000,
         });
         console.log(response.data);
-        const { publisherId, firstName,lastName, email, mobile, dateOfBirth, userType, token } = response.data;
+        const { publisherId, firstName, lastName, email, mobile, dateOfBirth, userType,totalEarnings, token } = response.data;
         setAuth({
           id: publisherId,
           firstName,
@@ -46,23 +55,25 @@ const PublisherLogin = () => {
           mobile,
           dateOfBirth,
           userType,
+          totalEarnings,
           token,
         });
         localStorage.setItem(
           "auth",
-          JSON.stringify({ id: publisherId,firstName,lastName,email, mobile, dateOfBirth, userType, token})
+          JSON.stringify({ id: publisherId, firstName, lastName, email, mobile, dateOfBirth, userType,totalEarnings, token })
         );
         console.log(response.data);
         navigate("/");
-      } else  {
+      } else {
         console.log(response.data);
         toast.error(response.data.message);
       }
     } catch (error) {
-      toast.error(error);
+      toast.error("Invalid Credentials");
       console.log(error);
     }
   };
+
   return (
     <>
       <Layout>
@@ -79,17 +90,15 @@ const PublisherLogin = () => {
               <h1 className="mb-5 text-[#ff6f61] text-2xl md:text-3xl">
                 Publisher Login
               </h1>
-              <form action="/login" method="post">
+              <form onSubmit={logIn}>
                 <div className="mb-5 text-left">
                   <label htmlFor="email" className="block mb-2 text-[#333]">
                     Email
                   </label>
-                  {errorMessageEmail ? (
+                  {errorMessageEmail && (
                     <p className="text-red-500 text-xs mb-2">
                       {errorMessageEmail}
                     </p>
-                  ) : (
-                    <p></p>
                   )}
                   <input
                     type="email"
@@ -101,7 +110,7 @@ const PublisherLogin = () => {
                     className="w-full p-2 border border-[#ddd] rounded-md"
                   />
                 </div>
-                <div className="mb-5 text-left">
+                <div className="mb-5 text-left relative">
                   <label htmlFor="password" className="block mb-2 text-[#333]">
                     Password
                   </label>
@@ -110,20 +119,27 @@ const PublisherLogin = () => {
                       {errorMessagePassword}
                     </p>
                   )}
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="w-full p-2 border border-[#ddd] rounded-md"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      id="password"
+                      name="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="w-full p-2 border border-[#ddd] rounded-md pr-10"
+                    />
+                    <span
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-[#333]"
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </span>
+                  </div>
                 </div>
                 <button
                   type="submit"
                   className="bg-[#ff6f61] text-white p-2.5 rounded-md w-full text-lg hover:bg-[#e65a50]"
-                  onClick={logIn}
                 >
                   Login
                 </button>

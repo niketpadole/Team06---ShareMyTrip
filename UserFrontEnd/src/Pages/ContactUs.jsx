@@ -1,7 +1,34 @@
-import React from "react";
+import React, { useState } from "react";
 import Layout from "../Components/Layouts/Layout";
 
 const ContactUs = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    mobileno: "",
+    subject: "",
+    message: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const mailtoLink = `mailto:sharemytripteam@gmail.com?subject=${encodeURIComponent(
+      formData.subject
+    )}&body=${encodeURIComponent(
+      `Name: ${formData.name}\nMobile No: ${formData.phone}\n\n${formData.message}`
+    )}`;
+
+    window.location.href = mailtoLink;
+  };
+
   return (
     <>
       <Layout>
@@ -16,7 +43,7 @@ const ContactUs = () => {
                 Contact us using the form below or reach out to us directly via
                 email or phone.
               </p>
-              <form action="#" method="POST" className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="flex flex-col">
                   <label htmlFor="name" className="mb-2 text-gray-600">
                     Name
@@ -26,18 +53,22 @@ const ContactUs = () => {
                     id="name"
                     name="name"
                     className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={formData.name}
+                    onChange={handleChange}
                     required
                   />
                 </div>
                 <div className="flex flex-col">
-                  <label htmlFor="email" className="mb-2 text-gray-600">
-                    Email
+                  <label htmlFor="phone" className="mb-2 text-gray-600">
+                    Mobile Number
                   </label>
                   <input
-                    type="email"
-                    id="email"
-                    name="email"
+                    type="tel"
+                    id="phone"
+                    name="phone"
                     className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={formData.phone}
+                    onChange={handleChange}
                     required
                   />
                 </div>
@@ -50,47 +81,41 @@ const ContactUs = () => {
                     id="subject"
                     name="subject"
                     className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={formData.subject}
+                    onChange={handleChange}
                     required
                   />
                 </div>
                 <div className="flex flex-col">
                   <label htmlFor="message" className="mb-2 text-gray-600">
-                    Message
+                    Concern
                   </label>
                   <textarea
                     id="message"
                     name="message"
                     rows="6"
                     className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={formData.message}
+                    onChange={handleChange}
                     required
                   ></textarea>
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300"
+                  className="w-full bg-[#ff6f61] text-white py-2 rounded-lg  transition duration-300"
                 >
                   Send Message
                 </button>
               </form>
             </div>
             <div className="md:w-1/2 md:pl-8 mt-8 md:mt-0">
-              <h2 className="text-2xl font-bold mb-4 text-gray-800">
-                Our Office
-              </h2>
-              <p className="mb-4 text-gray-600">
-                1234 ShareMyTrip Avenue
-                <br />
-                Suite 100
-                <br />
-                San Francisco, CA 94103
-              </p>
-              <p className="mb-4 text-gray-600">Phone: (123) 456-7890</p>
+              <p className="mb-4 text-gray-600">Phone: 123 456-7890</p>
               <p className="mb-8 text-gray-600">
-                Email: support@sharemytrip.com
+                Email: sharemytripteam@gmail.com
               </p>
               <div className="map-embed mb-8">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.019609653074!2d-122.40240938468207!3d37.77492957975969!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8085808c7b0d8b33%3A0x7e5ff3d44c1a05e1!2sSan+Francisco%2C+CA%2C+USA!5e0!3m2!1sen!2sin!4v1549345472000"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3770.804198897531!2d72.87765531501696!3d19.076090587089774!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7b83b0b8b8b21%3A0x5c49dbd5e6d0b3a4!2sMumbai%2C+Maharashtra%2C+India!5e0!3m2!1sen!2sin!4v1549345472000"
                   width="100%"
                   height="250"
                   frameBorder="0"
@@ -99,11 +124,6 @@ const ContactUs = () => {
                   title="Office Location"
                 ></iframe>
               </div>
-              <img
-                src="https://s3.amazonaws.com/niket.in.net/shareMyTrip/office.jpg"
-                alt="Office"
-                className="rounded-lg shadow-lg"
-              />
             </div>
           </section>
         </main>
